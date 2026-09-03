@@ -8,7 +8,7 @@ Aureon Store is a modern, full-stack MERN (MongoDB, Express, React, Node.js) e-c
 * **Decoupled Monorepo:** Clean separation of concerns between `frontend` and `backend` codebases for independent development and deployment.
 * **Hardened Authentication:** JWT-based user sessions utilizing secure, `HttpOnly` cookies to prevent XSS attacks.
 * **Strict Input Validation:** Dedicated middleware layer (Express Validator) intercepting and validating all registration, login, and product data before hitting controllers.
-* **Double-Entry Ledger & Idempotency:** Financial and transactional actions utilize atomic MongoDB sessions, double-entry bookkeeping, and unique idempotency keys to prevent duplicate operations.
+* **Transactional Email Engine:** Integrated Resend SDK for reliable onboarding emails and registration welcome notifications using responsive HTML templates.
 
 ### 📱 Performance & User Experience
 * **Fully Responsive Design:** Tailored UI built with Tailwind CSS, ensuring smooth, mobile-first browsing across desktop, tablet, and mobile displays.

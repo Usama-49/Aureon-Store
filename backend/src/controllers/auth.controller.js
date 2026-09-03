@@ -2,6 +2,7 @@ const userModel = require("../models/user.model");
 const itemsModel = require("../models/items.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {sendRegistrationEmail}   = require("../services/resend");
 require("dotenv").config();
 
 const register = async (req, res) => {
@@ -25,6 +26,8 @@ const register = async (req, res) => {
       email,
       password: pass,
     });
+    //* Send registration email ...
+    await sendRegistrationEmail(email, username);
     return res.status(201).json({
       success: true,
       message: "User Created ✅",
