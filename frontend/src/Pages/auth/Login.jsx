@@ -27,39 +27,32 @@ export default function Login() {
   }
 
   // Handle Form Submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ // Handle Form Submit
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      // Send Login Request
-      const res = await api.post("/auth/login", formData);
+    // 1. Authenticate & set cookie/token
+    const res = await api.post("/auth/login", formData);
 
-      if (res.data.success) {
-        const user = await verifyUser();
-
-        toast.success("Login successful");
-
-        if (user.isBanned) {
-          navigate("/", { replace: true });
-        } else if (user.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else if (user.role === "user") {
-          navigate("/home", { replace: true });
-        } else {
-          navigate("/", { replace: true });
-        }
-      }
-    } catch (error) {
-      console.log(error.response?.data || error.message);
-
-      setError(error.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+    if (res.data.success) {
+      toast.success("Login successful");
+      
+      await verifyUser();
+      
+      // Hand off routing logic entirely to App.jsx
+      navigate("/", { replace: true });
     }
-  };
+  } catch (error) {
+    console.log(error.response?.data || error.message);
+    setError(error.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-zinc-800 flex items-center justify-center px-6">

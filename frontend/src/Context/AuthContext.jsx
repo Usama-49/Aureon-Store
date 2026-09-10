@@ -8,6 +8,7 @@ export default function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isBanned,setIsBanned] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   const verifyUser = async () => {
     try {
@@ -15,9 +16,11 @@ export default function AuthProvider({ children }) {
       setLoggedIn(res.data.authenticated);
       setRole(res.data.role);
       setIsBanned(res.data.isBanned);
+      setIsVerified(res.data.isVerified);
       return {
         role: res.data.role,
         isBanned: res.data.isBanned,
+        isVerified:res.data.isVerified,
       };
     } catch {
       setLoggedIn(false);
@@ -41,7 +44,8 @@ export default function AuthProvider({ children }) {
         setRole,
         verifyUser,
         authLoading,
-        isBanned
+        isBanned,
+        isVerified
       }}
     >
       {children}

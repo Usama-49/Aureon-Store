@@ -21,10 +21,10 @@ import AdminOrderDetails from "./Pages/admin/AdminOrderDetails";
 import DashboardUsers from "./Pages/admin/admin-dashboard/DashboardUsers";
 import AdminUserDetails from "./Pages/admin/admin-dashboard/AdminUserDetails";
 import BannedUser from "./Components/BannedUser";
+import NotVerified from "./Components/NotVerified";
 
 export default function App() {
-  const { loggedIn, role, authLoading, isBanned } = useContext(authContext);
-  console.log(isBanned);
+  const { loggedIn, role, authLoading, isBanned, isVerified } = useContext(authContext);
   if (authLoading) {
     return <Loading />;
   }
@@ -42,6 +42,8 @@ export default function App() {
                   <Landing />
                 ) : isBanned ? (
                   <BannedUser />
+                ) : !isVerified ? (
+                  <NotVerified />
                 ) : role === "admin" ? (
                   <Navigate to="/admin" replace />
                 ) : (

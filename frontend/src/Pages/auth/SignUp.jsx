@@ -1,5 +1,5 @@
-import {useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api/api";
 
@@ -42,15 +42,26 @@ export default function SignUp() {
       setLoading(true);
 
       // Send Data To Backend
-      const response = await api.post("/auth/register",formData);
+      const response = await api.post("/auth/register", formData);
 
-      if(response.data.success){
-      setSuccessMessage("Account created successfully");
+      if (response.data.success) {
+        toast.info(
+          "📩 Registration successful! Please check your email/spam folder to verify your account before logging in.",
+          {
+            position: "top-center",
+            autoClose: 4000,
+            theme: "dark",
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          },
+        );
+        // Redirect To Login
+        setTimeout(() => {
+          navigate("/login");
+        }, 3500);
       }
-      // Redirect To Login
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
     } catch (error) {
       console.log(error);
       setErrorMessage(error.response?.data?.message || "Something went wrong");
@@ -64,7 +75,9 @@ export default function SignUp() {
       <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-8 shadow-2xl">
         <h1 className="text-3xl font-bold text-white text-center mb-2">Create Account</h1>
 
-        <p className="text-zinc-400 text-center mb-8">Join the store and begin your financially questionable journey</p>
+        <p className="text-zinc-400 text-center mb-8">
+          Join the store and begin your financially questionable journey
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}
@@ -127,9 +140,17 @@ export default function SignUp() {
             />
           </div>
 
-         {/* Error Handling */}
-          {errorMessage && <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-xl text-sm">❌ {errorMessage}</div>}
-          {successMessage && <div className="bg-green-500/10 border border-green-500 text-green-400 px-4 py-3 rounded-xl text-sm">✅ {successMessage}</div>}
+          {/* Error Handling */}
+          {errorMessage && (
+            <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-xl text-sm">
+              ❌ {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className="bg-green-500/10 border border-green-500 text-green-400 px-4 py-3 rounded-xl text-sm">
+              ✅ {successMessage}
+            </div>
+          )}
           {/* Submit */}
           <button
             type="submit"

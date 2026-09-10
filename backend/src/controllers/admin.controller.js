@@ -4,10 +4,10 @@ const orderModel = require("../models/orders.model");
 const { uploadImage, client } = require("../services/imagekit");
 
 const totalProducts = async (req, res) => {
-  if(req.user.isBanned){
+  if (req.user.isBanned) {
     return res.status(401).json({
-      message:"User is Banned"
-    })
+      message: "User is Banned",
+    });
   }
   const total = await itemsModel.countDocuments();
   return res.status(200).json({
@@ -67,6 +67,11 @@ const addItem = async (req, res) => {
   }
 };
 const delItem = async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(401).json({
+      message: "Unauthorized!",
+    });
+  }
   try {
     const { id } = req.params;
     const toBeDeletedItem = await itemsModel.findById(id);
@@ -292,7 +297,7 @@ const patchUserDetails = async (req, res) => {
     await user.save();
     return res.status(200).json({
       message: "User Status Updated Successfully",
-      isBanned: user.isBanned
+      isBanned: user.isBanned,
     });
   } catch (err) {
     console.log(err);
