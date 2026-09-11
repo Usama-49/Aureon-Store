@@ -257,20 +257,20 @@ const getUserDetails = async (req, res) => {
         message: "Unauthorized",
       });
     }
+
     const { id } = req.params;
     const user = await userModel.findById(id);
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    const orders = await orderModel.find({ user: { $eq: id } });
-    if (orders.length === 0) {
-      return res.status(204).json({
-        message: "No orders to fetch!",
-      });
-    }
+
+    const orders = await orderModel.find({ user: id });
+
+    // If no orders exist, simply return an empty array [].
     return res.status(200).json({
       user,
-      orders,
+      orders: orders || [],
     });
   } catch (err) {
     console.log(err);
