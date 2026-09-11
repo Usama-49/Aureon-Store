@@ -36,7 +36,7 @@ const register = async (req, res) => {
         expiresIn: "30m",
       },
     );
-    const verifyUrl = `${process.env.APP_URL}/auth/verify-email?token=${verifyToken}`;
+    const verifyUrl = `${process.env.APP_URL}/api/auth/verify-email?token=${verifyToken}`;
     await sendRegistrationEmail(email, verifyUrl);
     return res.status(201).json({
       success: true,
