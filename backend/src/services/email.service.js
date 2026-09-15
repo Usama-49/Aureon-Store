@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
@@ -9,7 +10,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  family: 4,
+  // ⚡ The Killswitch: Hijack DNS to force IPv4 at the socket level
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+      callback(err, address, family);
+    });
+  },
   connectionTimeout: 10000,
   greetingTimeout: 5000,
   socketTimeout: 10000,
