@@ -20,7 +20,7 @@ export default function Landing() {
           </Link>
         </div>
 
-        <p className="text-zinc-500 text-sm text-center mt-8">Tiny e-commerce apps eventually become portfolio projects. Nature is beautiful.</p>
+        <p className="text-zinc-500 text-sm text-center mt-8">Your destination for premium collectibles and gear</p>
       </div>
     </div>
   );

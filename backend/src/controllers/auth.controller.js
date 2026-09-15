@@ -2,49 +2,48 @@ const userModel = require("../models/user.model");
 const itemsModel = require("../models/items.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendRegistrationEmail } = require("../services/resend");
+const { sendRegistrationEmail } = require("../services/email.service");
 require("dotenv").config();
 
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
     const isUserExists = await userModel.findOne({
       $or: [{ username }, { email }],
     });
-
     if (isUserExists) {
       return res.status(409).json({
         message: "User Already Exists ❌",
       });
     }
-
     const pass = await bcrypt.hash(password, 10);
-
     const user = await userModel.create({
       username,
       email,
       password: pass,
     });
-    //* Send registration email ...
-    const verifyToken = jwt.sign(
-      {
-        id: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "30m",
-      },
-    );
-    const verifyUrl = `${process.env.APP_URL}/api/auth/verify-email?token=${verifyToken}`;
-    await sendRegistrationEmail(email, verifyUrl);
+
+    // Generate token
+    const verifyToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30m" });
+    const clientUrl = process.env.CLIENT_URL;
+    const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
+    try {
+      await sendRegistrationEmail(email, verifyUrl);
+    } catch (mailErr) {
+      console.error("Nodemailer failed to dispatch:", mailErr);
+      return res.status(201).json({
+        success: true,
+        message: "Account created, but verification email failed to send. Please contact support.",
+        role: user.role,
+      });
+    }
     return res.status(201).json({
       success: true,
-      message: "User Created ✅",
+      message: "User Created ✅ Please check your email to verify.",
       role: user.role,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Register Error:", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -71,6 +70,7 @@ const verifyEmail = async (req, res) => {
     }
     user.isVerified = true;
     await user.save();
+
     return res.status(200).json({
       message: "Email verified successfully!",
     });
@@ -158,17 +158,28 @@ const getItems = async (req, res) => {
     }
     const page = Number(req.query.page) || 1;
     const PAGE_SIZE = 12;
+    const { search, category } = req.query;
+    let filter = {};
+    if (category && category !== "All") {
+      filter.category = category;
+    }
+    //* case-insensitive regex search on product name
+    if (search && search.trim() !== "") {
+      filter.name = { $regex: search.trim(), $options: "i" };
+    }
+
     const items = await itemsModel
-      .find()
+      .find(filter)
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE);
-    const totalProducts = await itemsModel.countDocuments();
+    const totalProducts = await itemsModel.countDocuments(filter);
     res.status(200).json({
       message: "Fetch Successful ✅",
       items,
       totalProducts,
     });
   } catch (error) {
+    console.error("Fetch Items Error:", error);
     res.status(500).json({
       message: "Internal Server Error",
     });

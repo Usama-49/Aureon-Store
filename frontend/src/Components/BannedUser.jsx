@@ -1,3 +1,5 @@
+import { Mail } from "lucide-react";
+
 export default function BannedUser() {
   return (
     <section className="min-h-screen bg-zinc-900 flex items-center justify-center px-6">
@@ -20,14 +22,16 @@ export default function BannedUser() {
           <li>A brief explanation of why you believe the ban should be reviewed</li>
         </ul>
 
-        <p className="mt-6 text-center text-zinc-400">
-          Contact the administrator at{" "}
-          <p
-            className="text-orange-400 mt-2 hover:text-orange-300 font-semibold"
+        <div className="mt-6 pt-4 border-t border-zinc-900 flex flex-col items-center gap-2">
+          <span className="text-sm text-zinc-400">Contact the administrator at</span>
+          <a
+            href="mailto:usamahere49@gmail.com?subject=Account%20Ban%20Review%20Request"
+            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-xl transition-all duration-200 text-sm shadow-md"
           >
-            usamahere49@gmail.com
-          </p>
-        </p>
+            <Mail className="w-4 h-4 text-orange-500" />
+            <span>usamahere49@gmail.com</span>
+          </a>
+        </div>
       </div>
     </section>
   );

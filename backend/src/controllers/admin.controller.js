@@ -27,12 +27,37 @@ const addItem = async (req, res) => {
         message: "Unauthorized",
       });
     }
-    const { name, category, stock, description, price } = req.body;
+
+    const { name, stock, description, price } = req.body;
+
+    //* Validate required text/number parameters
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ message: "Product name is required!" });
+    }
+    if (price === undefined || price === null || price === "" || Number(price) <= 0) {
+      return res.status(400).json({ message: "Valid product price is required!" });
+    }
+    if (stock === undefined || stock === null || stock === "" || Number(stock) < 0) {
+      return res.status(400).json({ message: "Valid stock quantity is required!" });
+    }
+    if (!description || description.trim() === "") {
+      return res.status(400).json({ message: "Product description is required!" });
+    }
+
+    const rawCategory = req.body.category?.trim() || "Uncategorized";
+    const formattedCategory = rawCategory
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+    //* Validate image upload
     if (!req.file) {
       return res.status(400).json({
         message: "Image file is required!",
       });
     }
+
     const image = req.file.buffer;
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -41,25 +66,27 @@ const addItem = async (req, res) => {
         message: "Only JPG, PNG and WEBP images are allowed.",
       });
     }
+
     const result = await uploadImage(image.toString("base64"));
+
     const item = await itemsModel.create({
-      name,
-      price,
+      name: name.trim(),
+      price: Number(price),
       image: {
         url: result.url,
         fileId: result.fileId,
       },
-      stock,
-      description,
-      category,
+      stock: Number(stock),
+      description: description.trim(),
+      category: formattedCategory || "Uncategorized",
     });
+
     res.status(201).json({
       message: "Created Successfully ✅",
       item,
     });
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

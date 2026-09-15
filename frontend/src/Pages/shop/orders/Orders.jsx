@@ -2,7 +2,6 @@ import { ChevronLeft, Package, Clock3, CircleCheckBig, CircleX, DollarSign } fro
 import { Link } from "react-router-dom";
 import OrderCard from "./OrderCard";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Loading from "../../../Components/Loading";
 import api from "../../../services/api/api";
 

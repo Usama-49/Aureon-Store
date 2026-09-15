@@ -13,26 +13,37 @@ export default function AddListing() {
   const { products } = useContext(CartContext);
   const item = products.find((p) => p._id === id);
   const [loading, setLoading] = useState(false);
-  const [show,setShow] = useState(false);
+  const [show, setShow] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [formData, setFormData] = useState(null);
-  
-  const categories = ["Laptop", "Phone","History", "Camera", "Tablet", "Anime","HollyWood"];
-  const handleFormSubmit = (e)=>{
+  const formatCategory = (str) => {
+    if (!str) return "";
+    return str
+      .trim()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const handleFormSubmit = (e) => {
     e.preventDefault();
     const data = new FormData(e.target);
+    const rawCategory = data.get("category");
+    if (rawCategory) {
+      data.set("category", formatCategory(rawCategory));
+    }
     setFormData(data);
     setShow(true);
-  }
+  };
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      setConfirming(true)
+      setConfirming(true);
       if (id) {
-        await api.patch(`/admin/items/${id}`,formData);
+        await api.patch(`/admin/items/${id}`, formData);
         toast.success("Updating Product successful");
       } else {
-        await api.post("/admin/addItem",formData);
+        await api.post("/admin/addItem", formData);
         toast.success("Listing successful");
       }
       navigate("/home");
@@ -44,6 +55,7 @@ export default function AddListing() {
     } finally {
       setLoading(false);
       setConfirming(false);
+      setShow(false)
     }
   };
   return (
@@ -98,19 +110,14 @@ export default function AddListing() {
 
             <div>
               <label className="block text-zinc-300 mb-2 font-medium">Product Category</label>
-
-              <select
+              <input
+                type="text"
                 name="category"
                 defaultValue={id ? item?.category : ""}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-orange-500 transition-all cursor-pointer"
+                placeholder="e.g. Anime, Hollywood, Laptops"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-orange-500 transition-all"
                 required
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category} className="bg-zinc-900">
-                    {category}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>
@@ -135,7 +142,8 @@ export default function AddListing() {
                 accept="image/*"
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-300 file:bg-orange-500
                 file:text-white file:border-none file:px-4 file:py-2 file:rounded-lg file:mr-4 cursor-pointer"
-                required= {!id}              />
+                required={!id}
+              />
             </div>
 
             <div>
@@ -166,7 +174,12 @@ export default function AddListing() {
             </button>
           </form>
         </div>
-        <ConfirmModal isOpen={show} onCancel={()=>setShow(false)} onConfirm={handleSubmit} isConfirming={confirming}/>
+        <ConfirmModal
+          isOpen={show}
+          onCancel={() => setShow(false)}
+          onConfirm={handleSubmit}
+          isConfirming={confirming}
+        />
       </div>
     </div>
   );

@@ -1,8 +1,7 @@
-import {useContext, useState} from "react";
+import {useContext} from "react";
 import {Tag} from "lucide-react";
 import {CartContext} from "../Context/CartContext";
 
-// const availableCategories = ["All", ...new Set(initialProducts.map((p) => p.category))];
 export default function CategoryFilter({selectedCategory, setselectedCategory}) {
   const {availableCategories} = useContext(CartContext);
 

@@ -31,7 +31,7 @@ export default function App() {
   return (
     <>
       <Router>
-        <div className="min-h-screen bg-zinc-800 font-sans">
+        <div className="min-h-screen w-full overflow-x-hidden bg-zinc-800 font-sans">
           <NavBar />
           <Routes>
             //! Parent Route

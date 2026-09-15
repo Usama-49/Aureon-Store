@@ -18,7 +18,7 @@ export default function ProductCard({ product, currentPage }) {
       setIsDeleting(true);
       await api.delete(`/admin/items/${id}`);
       toast.success(`Deleted Item with id:${id}`);
-      await fetchProducts();
+      await fetchProducts(currentPage);
     } catch (err) {
       console.log(err);
       toast.error("Deletion failed!");
