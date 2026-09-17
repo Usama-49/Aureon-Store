@@ -1,30 +1,53 @@
 const nodemailer = require("nodemailer");
-const dns = require("dns");
+const { google } = require("googleapis");
 require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // ⚡ The Killswitch: Hijack DNS to force IPv4 at the socket level
-  lookup: (hostname, options, callback) => {
-    dns.lookup(hostname, { family: 4 }, (err, address, family) => {
-      callback(err, address, family);
+const OAuth2 = google.auth.OAuth2;
+
+const createTransporter = async () => {
+  const { EMAIL_USER, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REFRESH_TOKEN } = process.env;
+  if (!EMAIL_USER || !OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET || !OAUTH_REFRESH_TOKEN) {
+    throw new Error("[Email Service] Missing required OAuth2 environment variables in .env");
+  }
+  const oauth2Client = new OAuth2(
+    process.env.OAUTH_CLIENT_ID,
+    process.env.OAUTH_CLIENT_SECRET,
+    "https://developers.google.com/oauthplayground",
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+  });
+
+  const accessToken = await new Promise((resolve, reject) => {
+    oauth2Client.getAccessToken((err, token) => {
+      if (err || !token) {
+        reject(err || new Error("Failed to generate access token"));
+      } else {
+        resolve(token);
+      }
     });
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 5000,
-  socketTimeout: 10000,
-});
+  });
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user: process.env.EMAIL_USER,
+      clientId: process.env.OAUTH_CLIENT_ID,
+      clientSecret: process.env.OAUTH_CLIENT_SECRET,
+      refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+      accessToken,
+    },
+  });
+};
 
 const sendRegistrationEmail = async (userMail, verifyUrl) => {
   try {
+    const transporter = await createTransporter();
+
     const info = await transporter.sendMail({
-      from: '"Aureon Store" <paglsando@gmail.com>',
+      from: `"Aureon Store" <${process.env.EMAIL_USER}>`,
       to: userMail,
       subject: "🎉 Welcome Aboard the Aureon Experience!",
       html: `
@@ -34,7 +57,6 @@ const sendRegistrationEmail = async (userMail, verifyUrl) => {
         Thanks for signing up. Please verify your email address to activate your account and get started.
       </p>
       
-      <!-- 3. Clean "Verify Account" Button redirecting directly to verifyUrl -->
       <div style="text-align: center; margin: 30px 0;">
         <a href="${verifyUrl}" target="_blank" style="background-color: #f97316; color: #ffffff; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
           Verify Account
@@ -51,7 +73,7 @@ const sendRegistrationEmail = async (userMail, verifyUrl) => {
 
     return info;
   } catch (err) {
-    console.error("Email Service Exception:", err);
+    console.error("[Email Service] Failed:", err);
     throw err;
   }
 };
