@@ -6,24 +6,33 @@ const OAuth2 = google.auth.OAuth2;
 
 const createTransporter = async () => {
   const { EMAIL_USER, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REFRESH_TOKEN } = process.env;
+
   if (!EMAIL_USER || !OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET || !OAUTH_REFRESH_TOKEN) {
-    throw new Error("[Email Service] Missing required OAuth2 environment variables in .env");
+    console.error("[Email Service Config Error] Missing one or more OAuth2 environment variables.");
+    throw new Error("Missing required OAuth2 environment variables in .env");
   }
+
+  console.log("[Email Service] Initializing OAuth2 Client...");
+
   const oauth2Client = new OAuth2(
-    process.env.OAUTH_CLIENT_ID,
-    process.env.OAUTH_CLIENT_SECRET,
-    "https://developers.google.com/oauthplayground",
+    OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET,
+    "https://developers.google.com/oauthplayground"
   );
 
   oauth2Client.setCredentials({
-    refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+    refresh_token: OAUTH_REFRESH_TOKEN,
   });
+
+  console.log("[Email Service] Fetching dynamic access token from Google...");
 
   const accessToken = await new Promise((resolve, reject) => {
     oauth2Client.getAccessToken((err, token) => {
       if (err || !token) {
+        console.error("[Email Service OAuth Error] Failed to generate access token:", err);
         reject(err || new Error("Failed to generate access token"));
       } else {
+        console.log("[Email Service] Access token successfully obtained.");
         resolve(token);
       }
     });
@@ -31,20 +40,28 @@ const createTransporter = async () => {
 
   return nodemailer.createTransport({
     service: "gmail",
+    logger: true, // Enables detailed internal Nodemailer logs in console
+    debug: true,  // Includes SMTP communication details
     auth: {
       type: "OAuth2",
-      user: process.env.EMAIL_USER,
-      clientId: process.env.OAUTH_CLIENT_ID,
-      clientSecret: process.env.OAUTH_CLIENT_SECRET,
-      refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+      user: EMAIL_USER,
+      clientId: OAUTH_CLIENT_ID,
+      clientSecret: OAUTH_CLIENT_SECRET,
+      refreshToken: OAUTH_REFRESH_TOKEN,
       accessToken,
     },
   });
 };
 
 const sendRegistrationEmail = async (userMail, verifyUrl) => {
+  console.log(`\n================ [EMAIL DISPATCH START] ================`);
+  console.log(`[Email Service] Target Recipient: ${userMail}`);
+  console.log(`[Email Service] Sender Account: ${process.env.EMAIL_USER}`);
+
   try {
     const transporter = await createTransporter();
+
+    console.log("[Email Service] Sending mail payload...");
 
     const info = await transporter.sendMail({
       from: `"Aureon Store" <${process.env.EMAIL_USER}>`,
@@ -71,9 +88,15 @@ const sendRegistrationEmail = async (userMail, verifyUrl) => {
   `,
     });
 
+    console.log("[Email Service SUCCESS] Message ID:", info.messageId);
+    console.log("[Email Service SUCCESS] Server Response:", info.response);
+    console.log(`================ [EMAIL DISPATCH END] ==================\n`);
+
     return info;
   } catch (err) {
-    console.error("[Email Service] Failed:", err);
+    console.error(`\n❌ [Email Service FAILED] Error dispatching to ${userMail}`);
+    console.error("[Email Service Stack Trace]:", err);
+    console.log(`================ [EMAIL DISPATCH END] ==================\n`);
     throw err;
   }
 };
