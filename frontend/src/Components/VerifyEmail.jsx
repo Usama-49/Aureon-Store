@@ -7,13 +7,13 @@ const VerifyEmail = () => {
   const token = searchParams.get("token");
   const navigate = useNavigate();
 
-  const [status, setStatus] = useState("verifying");
-  const [message, setMessage] = useState("Verifying your Aureon account...");
+  const [status, setStatus] = useState(() => (token ? "verifying" : "error"));
+  const [message, setMessage] = useState(() =>
+    token ? "Verifying your Aureon account..." : "Invalid or missing verification token.",
+  );
 
   useEffect(() => {
     if (!token) {
-      setStatus("error");
-      setMessage("Invalid or missing verification token.");
       return;
     }
 
@@ -79,13 +79,19 @@ const VerifyEmail = () => {
         </div>
 
         {/* Manual Actions */}
-        <div className="pt-2 border-t border-slate-800">
+        <div className="pt-2 border-t border-slate-800 space-y-3">
           <Link
             to="/login"
             className="inline-block w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm rounded-xl transition duration-200 shadow-md shadow-orange-500/10"
           >
             Go to Login
           </Link>
+
+          <p className="text-xs text-slate-400/80 leading-relaxed px-2">
+            Having trouble? You can try continuing with{" "}
+            <span className="text-slate-300 font-medium">Google</span> on the login page for
+            automatic account verification.
+          </p>
         </div>
       </div>
     </div>
