@@ -20,7 +20,7 @@ const VerifyEmail = () => {
     const verifyTokenOnBackend = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/auth/verify-email?token=${token}`,
+          `${import.meta.env.VITE_API_URL}/auth/verify-email?token=${token}`,
         );
         setStatus("success");
         setMessage(response.data.message || "Email verified successfully!");
