@@ -2,8 +2,10 @@ const userModel = require("../models/user.model");
 const itemsModel = require("../models/items.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendRegistrationEmail } = require("../services/email.service");
+const { sendRegistrationEmail, sendGoogleWelcomeEmail } = require("../services/email.service");
+const { getGoogleClient, generateToken } = require("../utils/auth.utils");
 require("dotenv").config();
+const crypto = require("crypto");
 
 const register = async (req, res) => {
   try {
@@ -28,7 +30,7 @@ const register = async (req, res) => {
     const clientUrl = process.env.CLIENT_URL;
     const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
     try {
-      await sendRegistrationEmail(email, verifyUrl);
+      sendRegistrationEmail(email, verifyUrl);
     } catch (mailErr) {
       console.error("Nodemailer failed to dispatch:", mailErr);
       return res.status(201).json({
@@ -101,13 +103,12 @@ const login = async (req, res) => {
       });
       return;
     }
-    const token = jwt.sign(
-      { id: user._id, role: user.role, isBanned: user.isBanned, isVerified: user.isVerified },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      },
-    );
+    const token = generateToken({
+      id: user._id,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified,
+    });
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
       httpOnly: true,
@@ -185,4 +186,109 @@ const getItems = async (req, res) => {
     });
   }
 };
-module.exports = { register, login, getItems, verify, logout, verifyEmail };
+
+const oAuthStart = async (req, res) => {
+  try {
+    const client = getGoogleClient();
+    const url = client.generateAuthUrl({
+      access_type: "offline",
+      prompt: "consent",
+      scope: ["openid", "email", "profile"],
+    });
+    return res.redirect(url);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Internal Server Error!",
+    });
+  }
+};
+
+const oAuthCallback = async (req, res) => {
+  const code = req.query.code;
+  if (!code) {
+    return res.status(400).json({ message: "Missing Code in CallBack" });
+  }
+  try {
+    const client = getGoogleClient();
+    const { tokens } = await client.getToken(code);
+    if (!tokens.id_token) {
+      return res.status(400).json({
+        message: "No google id_token found!",
+      });
+    }
+    //* Verify Token and get user info
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.OAUTH_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const email = payload?.email;
+    const emailVerified = payload?.email_verified;
+    if (!email || !emailVerified) {
+      return res.status(400).json({
+        message: "Email verification failed!",
+      });
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+    //* Username
+    const googleName = payload?.name || payload?.given_name;
+    const emailUsername = normalizedEmail.split("@")[0];
+    const baseUsername = (googleName || emailUsername).toLowerCase().replace(/[^a-z0-9_]/g, "");
+    // Add a short random suffix to guarantee uniqueness in your database
+    const username = `${baseUsername}_${crypto.randomBytes(2).toString("hex")}`;
+    let user = await userModel.findOne({ email: normalizedEmail });
+    if (!user) {
+      const randomPass = crypto.randomBytes(16).toString("hex");
+      const password = await bcrypt.hash(randomPass, 10);
+      user = await userModel.create({
+        username,
+        email: normalizedEmail,
+        role: "user",
+        password,
+        isVerified: true,
+      });
+      sendGoogleWelcomeEmail(normalizedEmail, username);
+    } else {
+      if (!user.isVerified) {
+        user.isVerified = true;
+        await user.save();
+      }
+    }
+    const token = generateToken({
+      id: user._id,
+      role: user.role,
+      isBanned: user.isBanned,
+      isVerified: user.isVerified,
+    });
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction, // Must be true on HTTPS (Render)
+      sameSite: isProduction ? "none" : "lax", // "none" allows cross-domain cookies over HTTPS
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+    if (!clientUrl) {
+      return res.status(500).json({
+        message: "Client url missing!",
+      });
+    }
+    return res.redirect(`${clientUrl}/`);
+  } catch (err) {
+    console.error("[Google OAuth Error]:", err);
+    const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+    return res.redirect(clientUrl);
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getItems,
+  verify,
+  logout,
+  verifyEmail,
+  oAuthStart,
+  oAuthCallback,
+};

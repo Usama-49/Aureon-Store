@@ -93,5 +93,97 @@ const sendRegistrationEmail = async (userMail, verifyUrl) => {
     throw err;
   }
 };
+/**
+ * Sends welcome email to Google OAuth users via Gmail REST API.
+ */
+const sendGoogleWelcomeEmail = async (userMail, username) => {
+  try {
+    const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REFRESH_TOKEN, EMAIL_USER } = process.env;
 
-module.exports = { sendRegistrationEmail };
+    if (!OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET || !OAUTH_REFRESH_TOKEN || !EMAIL_USER) {
+      throw new Error("[Email Service] Missing required OAuth2 environment variables.");
+    }
+
+    const oauth2Client = new OAuth2(
+      OAUTH_CLIENT_ID,
+      OAUTH_CLIENT_SECRET,
+      "https://developers.google.com/oauthplayground",
+    );
+
+    oauth2Client.setCredentials({
+      refresh_token: OAUTH_REFRESH_TOKEN,
+    });
+
+    const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+
+    const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+
+    // Format UTF-8 Subject
+    const utf8Subject = `=?utf-8?B?${Buffer.from("Welcome to Aureon Store! Your Account is Ready 🚀").toString("base64")}?=`;
+
+    // Construct raw MIME message
+    const messageParts = [
+      `From: "Aureon Store" <${EMAIL_USER}>`,
+      `To: ${userMail}`,
+      `Content-Type: text/html; charset=utf-8`,
+      `MIME-Version: 1.0`,
+      `Subject: ${utf8Subject}`,
+      "",
+      `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 28px; border: 1px solid #3f3f46; border-radius: 16px; background-color: #18181b; color: #e4e4e7;">
+        <h1 style="text-align: center; font-size: 26px; font-weight: 800; color: #ffffff; margin-top: 0; margin-bottom: 20px;">
+          AUREON <span style="color: #f97316;">STORE</span>
+        </h1>
+
+        <h2 style="color: #ffffff; font-size: 18px; font-weight: 700; margin-bottom: 12px;">
+          You're All Set, ${username}! 🎉
+        </h2>
+
+        <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Your account has been successfully created using Google. You can now explore our collection seamlessly.
+        </p>
+
+        <p style="color: #71717a; font-size: 13px; font-style: italic; margin-bottom: 24px;">
+          Shop smarter. Waste money responsibly.
+        </p>
+
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${clientUrl}" target="_blank" style="background-color: #f97316; color: #ffffff; padding: 12px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);">
+            Start Shopping
+          </a>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #27272a; margin: 24px 0 16px 0;">
+        <p style="color: #71717a; font-size: 12px; margin: 0; text-align: center;">
+          If you didn't create an account with Aureon Store, you can safely ignore this email.
+        </p>
+      </div>`,
+    ];
+
+    const message = messageParts.join("\n");
+
+    // Convert to URL-safe Base64
+    const encodedMessage = Buffer.from(message)
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+
+    const response = await gmail.users.messages.send({
+      userId: "me",
+      requestBody: {
+        raw: encodedMessage,
+      },
+    });
+
+    console.log(
+      "[Email Service SUCCESS] Dispatched Google Welcome Email via Gmail API:",
+      response.data.id,
+    );
+    return response.data;
+  } catch (err) {
+    console.error("[Email Service FAILED]:", err);
+  }
+};
+module.exports = { sendRegistrationEmail, sendGoogleWelcomeEmail };
+
+// https://developers.google.com/oauthplayground
