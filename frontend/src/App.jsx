@@ -22,6 +22,7 @@ import DashboardUsers from "./Pages/admin/admin-dashboard/DashboardUsers";
 import AdminUserDetails from "./Pages/admin/admin-dashboard/AdminUserDetails";
 import BannedUser from "./Components/BannedUser";
 import NotVerified from "./Components/NotVerified";
+import VerifyEmail from "./Components/VerifyEmail";
 
 export default function App() {
   const { loggedIn, role, authLoading, isBanned, isVerified } = useContext(authContext);
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="/admin/edit/:id" element={<AddListing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/home" element={<ProductList />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/orders" element={<Orders />} />
