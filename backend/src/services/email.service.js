@@ -12,7 +12,7 @@ const sendRegistrationEmail = async (userMail, verifyUrl) => {
     const oauth2Client = new OAuth2(
       process.env.OAUTH_CLIENT_ID,
       process.env.OAUTH_CLIENT_SECRET,
-      "https://developers.google.com/oauthplayground",
+      "https://developers.google.com/oauthplayground"
     );
 
     oauth2Client.setCredentials({
