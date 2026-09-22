@@ -27,32 +27,31 @@ export default function Login() {
   }
 
   // Handle Form Submit
- // Handle Form Submit
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-    // 1. Authenticate & set cookie/token
-    const res = await api.post("/auth/login", formData);
+      // 1. Authenticate & set cookie/token
+      const res = await api.post("/auth/login", formData);
 
-    if (res.data.success) {
-      toast.success("Login successful");
-      
-      await verifyUser();
-      
-      // Hand off routing logic entirely to App.jsx
-      navigate("/", { replace: true });
+      if (res.data.success) {
+        toast.success("Login successful");
+
+        await verifyUser();
+
+        // Hand off routing logic entirely to App.jsx
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+      setError(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.log(error.response?.data || error.message);
-    setError(error.response?.data?.message || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-zinc-800 flex items-center justify-center px-6">
@@ -79,7 +78,15 @@ const handleSubmit = async (e) => {
 
           {/* Password */}
           <div>
-            <label className="block text-zinc-300 mb-2">Password</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-zinc-300">Password</label>
+              <Link
+                to="/forgot-password"
+                className="text-xs text-zinc-400 hover:text-orange-400 transition-colors"
+              >
+                Forgot Password?
+              </Link>
+            </div>
 
             <input
               type="password"

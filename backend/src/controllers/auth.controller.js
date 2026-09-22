@@ -2,10 +2,14 @@ const userModel = require("../models/user.model");
 const itemsModel = require("../models/items.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendRegistrationEmail, sendGoogleWelcomeEmail } = require("../services/email.service");
+const {
+  sendRegistrationEmail,
+  sendGoogleWelcomeEmail,
+  sendPasswordResetEmail,
+} = require("../services/email.service");
 const { getGoogleClient, generateToken } = require("../utils/auth.utils");
 require("dotenv").config();
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 
 const register = async (req, res) => {
   try {
@@ -128,7 +132,6 @@ const login = async (req, res) => {
     });
   }
 };
-
 const verify = async (req, res) => {
   return res.status(200).json({
     authenticated: true,
@@ -281,7 +284,81 @@ const oAuthCallback = async (req, res) => {
     return res.redirect(clientUrl);
   }
 };
-
+const forgotPass = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({
+      message: "Email is required!",
+    });
+  }
+  const normalizedEmail = email.toLowerCase().trim();
+  try {
+    let user = await userModel.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "If a user with this email exists, we'll send u an email",
+      });
+    }
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    user.resetPasswordToken = tokenHash;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 1000 * 60);
+    await user.save();
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${rawToken}`;
+    await sendPasswordResetEmail(user.email, resetUrl);
+    return res.status(200).json({
+      success: true,
+      message: "If a user with this email exists, we'll send u an email",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Internal server Error, Plz retry later!",
+    });
+  }
+};
+const resetPass = async (req, res) => {
+  const { email, token, newPassword } = req.body;
+  if (!token) {
+    return res.status(400).json({
+      message: "Reset Token is missing!",
+    });
+  }
+  if (!newPassword || newPassword.length < 8 || newPassword.length > 20) {
+    return res.status(400).json({
+      message: "Password must be minimum 8 and maximum 20 character long!",
+    });
+  }
+  try {
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const normalizedEmail = email ? email.toLowerCase().trim() : "";
+    const user = await userModel.findOne({
+      resetPasswordToken: tokenHash,
+      resetPasswordExpires: { $gt: new Date() },
+      email: normalizedEmail,
+    });
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired token! Plz retry",
+      });
+    }
+    const newPass = await bcrypt.hash(newPassword, 10);
+    user.password = newPass;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    return res.status(200).json({
+      success: true,
+      message: "Password Changed Successfully!",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Internal server Error!",
+    });
+  }
+};
 module.exports = {
   register,
   login,
@@ -291,4 +368,6 @@ module.exports = {
   verifyEmail,
   oAuthStart,
   oAuthCallback,
+  forgotPass,
+  resetPass,
 };

@@ -23,6 +23,8 @@ import AdminUserDetails from "./Pages/admin/admin-dashboard/AdminUserDetails";
 import BannedUser from "./Components/BannedUser";
 import NotVerified from "./Components/NotVerified";
 import VerifyEmail from "./Components/VerifyEmail";
+import ForgotPassword from "./Components/auth/ForgotPassword";
+import ResetPassword from "./Components/auth/ResetPassword";
 
 export default function App() {
   const { loggedIn, role, authLoading, isBanned, isVerified } = useContext(authContext);
@@ -57,6 +59,8 @@ export default function App() {
             <Route path="/admin/edit/:id" element={<AddListing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/home" element={<ProductList />} />
             <Route path="/product/:id" element={<ProductDetail />} />

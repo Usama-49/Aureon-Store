@@ -8,6 +8,8 @@ const {
   verifyEmail,
   oAuthStart,
   oAuthCallback,
+  forgotPass,
+  resetPass,
 } = require("../controllers/auth.controller");
 const loginValidation = require("../middlewares/login.validation");
 const registerValidator = require("../middlewares/register.validation");
@@ -22,5 +24,8 @@ router.post("/logout", logout);
 router.get("/verify-email", verifyEmail);
 router.get("/google", oAuthStart);
 router.get("/google/callback", oAuthCallback);
+router.post("/forgot-password",forgotPass);
+router.post("/reset-password",resetPass);
+
 
 module.exports = router;
