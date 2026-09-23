@@ -9,6 +9,9 @@ import ConfirmModal from "./ConfirmModal";
 
 export default function ProductCard({ product, currentPage }) {
   const { addToCart, fetchProducts } = useContext(CartContext);
+  // const product = products?.find((data) => data._id == id);
+  const stockQuantity = product?.stock;
+
   const navigate = useNavigate();
   const { role } = useContext(authContext);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -87,10 +90,11 @@ export default function ProductCard({ product, currentPage }) {
           ) : (
             <button
               onClick={() => handleAdd(product)}
-              className="mt-5 flex items-center justify-center w-full py-3 bg-orange-500 border border-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-200"
+              disabled={stockQuantity <= 0}
+              className={`mt-5 flex items-center justify-center w-full py-3 font-bold rounded-full border  transition-all duration-200 ${stockQuantity > 0 ? "bg-orange-500  border-orange-500 text-white cursor-pointer hover:bg-orange-600":"bg-red-500/10 text-red-400 cursor-not-allowed border-red-500/20"}`}
             >
               <ShoppingCart size={20} />
-              <span className="ml-2">Add to Cart</span>
+              <span className="ml-2">{stockQuantity > 0 ? "Add to Cart" : "✕ Out of Stock"}</span>
             </button>
           )}
           <ConfirmModal isOpen={show} onCancel={()=>setShow(false)} isConfirming={isDeleting} onConfirm={()=>handleDel(product._id)}/>

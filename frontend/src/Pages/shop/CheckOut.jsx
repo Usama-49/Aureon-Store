@@ -1,14 +1,22 @@
-import { MapPin, Package } from "lucide-react";
+import { MapPin, Package, ChevronLeft, ShieldCheck } from "lucide-react";
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../Context/CartContext";
 import OrderConfirmation from "./OrderConfirmation";
-import axios from "axios";
 import { toast } from "react-toastify";
 import api from "../../services/api/api";
 
 export default function CheckOut() {
   const { totalPrice, clearCart, cart } = useContext(CartContext);
   const [confirm, setConfirm] = useState(false);
+  const navigate = useNavigate();
+
+  const [details, setDetails] = useState({
+    name: "",
+    address: "",
+    city: "",
+    zipCode: "",
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,114 +28,175 @@ export default function CheckOut() {
       })),
       shippingAddress: details,
     };
+
     try {
-      await api.post("/order/add",payload);
+      await api.post("/order/add", payload);
       toast.success("Order Placed!");
       clearCart();
       setConfirm(true);
     } catch (err) {
       console.error(err);
-
       toast.error(err.response?.data?.message || "Failed to place order.");
     }
   };
-  const [details, setDetails] = useState({
-    name: "",
-    address: "",
-    city: "",
-    zipCode: "",
-  });
+
   if (confirm) return <OrderConfirmation deliveryDetails={details} />;
+
   return (
-    <>
-      <div className="container mx-auto px-4 md:px-8 pt-8 ">
-        <h2 className="text-3xl font-bold tracking-tight mb-10">Finalize Order</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2 p-8 bg-gray-900 rounded-xl border border-gray-800">
-            <h3 className="text-2xl font-semibold text-orange-400/90 mb-6 flex items-center space-x-3 border-b  border-gray-700 pb-4">
-              <MapPin className="h-7 w-7 text-orange-400/90" />
-              <span>Shipping Information</span>
-            </h3>
-            <form onSubmit={handleSubmit}>
-              {Object.keys(details).map((key) => (
-                <div key={key}>
-                  <label className="block text-semibold text-gray-300 text-sm capitalize mb-1">
-                    <div className="flex flex-col ">
-                      <span className="font-semibold">{key}</span>
-                      <input
-                        onChange={(e) =>
-                          setDetails({ ...details, [e.target.name]: e.target.value })
-                        }
-                        name={key}
-                        required
-                        value={details[key]}
-                        className="border w-full rounded-lg px-4 mb-1 mt-2 py-2 focus:outline-none focus:ring-1/2 text-white focus:ring-orange-300 border-gray-700 focus:border-orange-500"
-                        type={key == "zipCode" ? "number" : "text"}
-                      />
-                    </div>
-                  </label>
-                </div>
-              ))}
-              <button
-                type="submit"
-                className="mt-5 flex items-center justify-center flex-row max-auto w-full py-3 bg-orange-500/80 border border-orange-500 text-white font-bold rounded-full hover:bg-orange-600/40 transition-all duration-200"
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex items-center text-gray-400 hover:text-orange-400 transition-colors duration-200 font-semibold text-base mb-6 group cursor-pointer"
+      >
+        <ChevronLeft className="w-5 h-5 mr-1 group-hover:-translate-x-1 transition-transform duration-200" />
+        <span>Back to Cart</span>
+      </button>
+
+      <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">
+        Finalize Order
+      </h2>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Shipping Form Container */}
+        <div className="lg:col-span-2 p-5 sm:p-8 bg-gray-900 rounded-2xl border border-gray-800 shadow-xl">
+          <h3 className="text-xl sm:text-2xl font-semibold text-orange-400/90 mb-6 flex items-center gap-3 border-b border-gray-800 pb-4">
+            <MapPin className="h-6 w-6 sm:h-7 sm:w-7 text-orange-400" />
+            <span>Shipping Information</span>
+          </h3>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Full Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                required
+                value={details.name}
+                onChange={(e) =>
+                  setDetails({ ...details, [e.target.name]: e.target.value })
+                }
+                placeholder="John Doe"
+                className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
+              />
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                Street Address
+              </label>
+              <input
+                type="text"
+                name="address"
+                required
+                value={details.address}
+                onChange={(e) =>
+                  setDetails({ ...details, [e.target.name]: e.target.value })
+                }
+                placeholder="123 Main St, Apt 4B"
+                className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
+              />
+            </div>
+
+            {/* City & Zip Code Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  City
+                </label>
+                <input
+                  type="text"
+                  name="city"
+                  required
+                  value={details.city}
+                  onChange={(e) =>
+                    setDetails({ ...details, [e.target.name]: e.target.value })
+                  }
+                  placeholder="New York"
+                  className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Zip Code
+                </label>
+                <input
+                  type="number"
+                  name="zipCode"
+                  required
+                  value={details.zipCode}
+                  onChange={(e) =>
+                    setDetails({ ...details, [e.target.name]: e.target.value })
+                  }
+                  placeholder="10001"
+                  className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="mt-6 w-full py-3.5 bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all duration-200 cursor-pointer"
+            >
+              Pay & Confirm Order (${totalPrice})
+            </button>
+          </form>
+        </div>
+
+        {/* Summary Sidebar Container */}
+        <div className="lg:col-span-1 p-5 sm:p-8 bg-gray-900 rounded-2xl border border-gray-800 shadow-xl lg:sticky lg:top-8">
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-5 pb-3 border-b border-gray-800 flex items-center gap-2">
+            <Package className="w-6 h-6 text-orange-400" />
+            <span>Summary</span>
+          </h3>
+
+          {/* Itemized List */}
+          <div className="border-b border-gray-800 pb-4 max-h-60 overflow-y-auto space-y-3 pr-1">
+            {cart.map((item) => (
+              <div
+                key={item._id}
+                className="flex justify-between items-center text-sm sm:text-base gap-3"
               >
-                <span className="ml-2">Pay & Confirm Order ({totalPrice}$)</span>
-              </button>
-            </form>
+                <span className="text-gray-300 font-medium truncate flex-1">
+                  {item.name}{" "}
+                  <span className="text-gray-500 text-xs">x{item.quantity}</span>
+                </span>
+                <span className="font-semibold text-orange-400 flex-shrink-0">
+                  ${item.price * item.quantity}
+                </span>
+              </div>
+            ))}
           </div>
-          {/* Second Child */}
-          <div className="lg:col-span-1 p-8 bg-gray-900 rounded-2xl border-1-4 sticky top-20 h-fit border border-gray-900/90 ">
-            <h3 className="text-2xl font-bold mb-5 space-x-2 flex items-center">
-              <div className="w-full border-b pb-3 border-gray-600">
-                <span className="w-6 h-6 text-orange-400 mr-1">
-                  <Package className="inline mb-1" />
-                </span>
-                <span className="ml-1">Summary</span>
-              </div>
-            </h3>
-            <div className="border-b border-gray-600 pb-3">
-              {cart.map((item) => {
-                return (
-                  <div key={item._id} className="flex justify-between mt-1 mb-3 items-center">
-                    <span className="text-gray-400 font-sm font-semibold line-clamp-1">
-                      {item.name}
-                    </span>
-                    <span className="font-sm font-semibold text-orange-400">
-                      {item.price * item.quantity}$
-                    </span>
-                  </div>
-                );
-              })}
+
+          {/* Pricing Totals */}
+          <div className="space-y-3 pt-4 border-b border-gray-800 pb-4 text-sm sm:text-base">
+            <div className="flex justify-between text-gray-400 font-medium">
+              <span>SubTotal</span>
+              <span className="text-gray-200">${totalPrice}</span>
             </div>
-            {/* Sub Total */}
-            <div className="space-y-4 mt-2">
-              <div className="text-lg ">
-                <span className="text-gray-400 font-semibold">
-                  SubTotal : <span>${totalPrice}</span>
-                </span>
-              </div>
+            <div className="flex justify-between text-gray-400 font-medium">
+              <span>Shipping (Express)</span>
+              <span className="text-green-400 font-semibold">Free</span>
             </div>
-            {/* Shipping Express */}
-            <div className="space-y-4 border-b border-gray-600 pb-4">
-              <div className="text-lg ">
-                <span className="text-gray-400 font-semibold">
-                  Shipping(Express) : <span className="text-green-400">Free</span>
-                </span>
-              </div>
-            </div>
-            {/* Estimate Total */}
-            <div className="space-y-4 mt-4">
-              <div className="text-xl font-semibold text-white">
-                Total Due : <span className="text-orange-500">${totalPrice}</span>
-              </div>
-            </div>
-            <p className="mt-3 ml-12 text-gray-400/80 text-sm font-light">
-              All Transactions are Processed Securely
-            </p>
+          </div>
+
+          <div className="pt-4 flex justify-between items-center text-lg sm:text-xl font-bold text-white">
+            <span>Total Due</span>
+            <span className="text-orange-400">${totalPrice}</span>
+          </div>
+
+          <div className="mt-5 flex items-center justify-center gap-2 text-gray-400/80 text-xs text-center font-medium">
+            <ShieldCheck className="w-4 h-4 text-green-400 flex-shrink-0" />
+            <span>All Transactions are Processed Securely</span>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

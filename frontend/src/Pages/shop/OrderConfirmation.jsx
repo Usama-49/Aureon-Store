@@ -5,7 +5,7 @@ export default function OrderConfirmation({deliveryDetails}) {
   return (
     <>
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-110 w-140 border-1 border-green-400/80 rounded-xl bg-gray-900/80">
+        <div className="h-110 w-140 border border-green-400/80 rounded-xl bg-gray-900/80">
           <div className="flex items-center justify-center">
             <CircleCheckBig className="mt-6 text-green-400 h-18 w-18" />
           </div>

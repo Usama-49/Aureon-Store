@@ -151,11 +151,23 @@ export default function SignUp() {
               ✅ {successMessage}
             </div>
           )}
+
+          <div className="bg-zinc-800/80 border border-zinc-700/60 text-xs px-3.5 py-2.5 rounded-xl text-center leading-relaxed">
+            <span className="font-bold text-zinc-300">Note:</span>{" "}
+            <span className="text-zinc-400">If register is not working, please try </span>
+            <Link
+              to="/"
+              className="inline-block font-semibold text-red-400 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-md hover:bg-zinc-700 hover:border-zinc-600 transition-colors duration-150"
+            >
+              Continue with Google
+            </Link>
+          </div>
+
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 mt-2 hover:bg-orange-600 text-white py-3 rounded-xl font-semibold transition duration-200 cursor-pointer disabled:opacity-50"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-semibold transition duration-200 cursor-pointer disabled:opacity-50"
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
