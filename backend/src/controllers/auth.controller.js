@@ -153,43 +153,6 @@ const logout = async (req, res) => {
   });
 };
 
-const getItems = async (req, res) => {
-  try {
-    if (req.user.isBanned) {
-      return res.status(401).json({
-        message: "User Is banned!",
-      });
-    }
-    const page = Number(req.query.page) || 1;
-    const PAGE_SIZE = 12;
-    const { search, category } = req.query;
-    let filter = {};
-    if (category && category !== "All") {
-      filter.category = category;
-    }
-    //* case-insensitive regex search on product name
-    if (search && search.trim() !== "") {
-      filter.name = { $regex: search.trim(), $options: "i" };
-    }
-
-    const items = await itemsModel
-      .find(filter)
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE);
-    const totalProducts = await itemsModel.countDocuments(filter);
-    res.status(200).json({
-      message: "Fetch Successful ✅",
-      items,
-      totalProducts,
-    });
-  } catch (error) {
-    console.error("Fetch Items Error:", error);
-    res.status(500).json({
-      message: "Internal Server Error",
-    });
-  }
-};
-
 const oAuthStart = async (req, res) => {
   try {
     const client = getGoogleClient();
@@ -362,7 +325,6 @@ const resetPass = async (req, res) => {
 module.exports = {
   register,
   login,
-  getItems,
   verify,
   logout,
   verifyEmail,

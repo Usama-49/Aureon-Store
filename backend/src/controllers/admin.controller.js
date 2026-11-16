@@ -137,14 +137,11 @@ const patchItem = async (req, res) => {
     }
     const { name, description, price, category, stock } = req.body;
     if (name !== undefined) product.name = name;
-
     if (description !== undefined) product.description = description;
-
     if (price !== undefined) product.price = price;
-
     if (category !== undefined) product.category = category;
-
     if (stock !== undefined) product.stock = stock;
+
     if (req.file) {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -170,6 +167,15 @@ const patchItem = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+
+    // Handle Mongoose validation errors gracefully with 400 instead of 500
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(", "),
+      });
+    }
 
     return res.status(500).json({
       success: false,

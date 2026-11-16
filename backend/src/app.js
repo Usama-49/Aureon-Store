@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/auth.route");
 const adminRouter = require("./routes/admin.route");
 const orderRouter = require("./routes/order.route");
+const itemsRouter = require("./routes/items.route");
 
 const app = express();
 app.use(express.json());
@@ -12,12 +13,12 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use("/api/auth", authRouter);
-app.use("/api/admin",adminRouter);
-app.use("/api/order",orderRouter);
-
+app.use("/api/admin", adminRouter);
+app.use("/api/order", orderRouter);
+app.use("/api/items", itemsRouter);
 
 module.exports = app;

@@ -15,19 +15,18 @@ export function CartProvider({ children }) {
 
   const fetchCategories = async () => {
     try {
-      const res = await api.get("/auth/getItems?page=1&limit=1000"); // or create a dedicated /categories endpoint
+      const res = await api.get("/items?page=1&limit=1000");
       const allCats = [...new Set(res.data.items.map((p) => p.category))].filter(Boolean);
       setCategoriesList(["All", ...allCats]);
     } catch (err) {
       console.log(err);
     }
   };
+
   const fetchProducts = async (page = 1, search = "", category = "All") => {
     try {
       setLoading(true);
-      const res = await api.get(
-        `/auth/getItems?page=${page}&search=${search}&category=${category}`,
-      );
+      const res = await api.get(`/items?page=${page}&search=${search}&category=${category}`);
 
       setInitialProducts(res.data.items);
       setTotalProducts(res.data.totalProducts);

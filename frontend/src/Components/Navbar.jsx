@@ -1,8 +1,18 @@
-import { House, ShoppingCart, LogOut, ShieldCheck, Package, ShoppingBag } from "lucide-react";
+import {
+  House,
+  ShoppingCart,
+  LogOut,
+  ShieldCheck,
+  Package,
+  ShoppingBag,
+  LogIn,
+  UserPlus,
+} from "lucide-react";
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../Context/CartContext";
 import { authContext } from "../Context/AuthContext";
+import { toast } from "react-toastify";
 import api from "../services/api/api";
 
 export default function NavBar() {
@@ -21,10 +31,17 @@ export default function NavBar() {
     }
   };
 
+  const handleCartClick = (e) => {
+    if (!loggedIn) {
+      e.preventDefault();
+      toast.warn("Plz login first");
+      navigate("/login");
+    }
+  };
+
   return (
     <header className="bg-zinc-900/90 sticky z-10 top-0 backdrop-blur-md text-white shadow-2xl shadow-gray-900/60 border-b border-orange-900/50">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center max-w-full overflow-hidden">
-        
         {/* Logo Section */}
         <Link to={!isBanned && (!loggedIn ? "/" : role === "user" ? "/home" : "/admin")}>
           <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0">
@@ -67,15 +84,16 @@ export default function NavBar() {
             </Link>
           )}
 
-          {!isBanned && role === "user" && (
+          {!isBanned && role !== "admin" && (
             <Link
               to={"/cart"}
+              onClick={handleCartClick}
               className="relative bg-orange-500/10 p-2 sm:p-3 rounded-xl hover:bg-orange-400/20 transition-all ease-in-out duration-300 border border-orange-400 shadow-lg cursor-pointer"
               title="Cart"
             >
               <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
 
-              {cartCount > 0 && (
+              {cartCount > 0 && loggedIn && (
                 <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] sm:text-xs leading-none text-white bg-red-400 rounded-md transform translate-x-1/2 -translate-y-1/2 min-w-[16px] ring-2 ring-gray-900">
                   {cartCount}
                 </span>
@@ -83,7 +101,7 @@ export default function NavBar() {
             </Link>
           )}
 
-          {loggedIn && (
+          {loggedIn ? (
             <button
               onClick={handleLogOut}
               className="bg-orange-500/10 p-2 sm:px-4 sm:py-3 rounded-xl hover:bg-orange-400/20 transition-all ease-in-out duration-300 border border-orange-400 shadow-lg cursor-pointer flex items-center gap-2 text-orange-400 font-medium text-sm"
@@ -92,6 +110,23 @@ export default function NavBar() {
               <LogOut className="w-5 h-5" />
               <span className="hidden sm:inline">Logout</span>
             </button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Link
+                to="/login"
+                className="bg-orange-500/10 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl hover:bg-orange-400/20 transition-all ease-in-out duration-300 border border-orange-400 shadow-lg cursor-pointer flex items-center gap-1.5 text-orange-400 font-medium text-sm"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Login</span>
+              </Link>
+              <Link
+                to="/signup"
+                className="bg-orange-500 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl hover:bg-orange-600 transition-all ease-in-out duration-300 shadow-lg cursor-pointer flex items-center gap-1.5 text-white font-medium text-sm"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Up</span>
+              </Link>
+            </div>
           )}
         </nav>
       </div>

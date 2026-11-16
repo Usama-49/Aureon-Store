@@ -9,13 +9,14 @@ import ConfirmModal from "./ConfirmModal";
 
 export default function ProductCard({ product, currentPage }) {
   const { addToCart, fetchProducts } = useContext(CartContext);
-  // const product = products?.find((data) => data._id == id);
   const stockQuantity = product?.stock;
 
   const navigate = useNavigate();
-  const { role } = useContext(authContext);
+  // changed: Pull loggedIn alongside role from authContext
+  const { role, loggedIn } = useContext(authContext);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [show,setShow] = useState(false);
+  const [show, setShow] = useState(false);
+
   const handleDel = async (id) => {
     try {
       setIsDeleting(true);
@@ -25,10 +26,11 @@ export default function ProductCard({ product, currentPage }) {
     } catch (err) {
       console.log(err);
       toast.error("Deletion failed!");
-    } finally{
+    } finally {
       setIsDeleting(false);
     }
   };
+
   const handleEdit = async (id) => {
     try {
       navigate(`/admin/edit/${id}`);
@@ -36,14 +38,26 @@ export default function ProductCard({ product, currentPage }) {
       console.log(err);
     }
   };
+
   const handleAdd = async (product) => {
+    // changed: Redirect guests to /login with a warning toast instead of adding to cart
+    if (!loggedIn) {
+      toast.warn("Plz login first");
+      navigate("/login");
+      return;
+    }
+
     addToCart(product);
     toast.success("Added to cart");
   };
+
   return (
     <>
       <div className="bg-gray-900 overflow-hidden rounded-2xl flex flex-col height-full transition-all duration-400 ease-in-out border border-gray-800 hover:scale-[1.03]">
-        <Link to={`/product/${product._id}?page=${currentPage}`} className="relative cursor-pointer overflow-hidden">
+        <Link
+          to={`/product/${product._id}?page=${currentPage}`}
+          className="relative cursor-pointer overflow-hidden"
+        >
           <img
             src={product.image.url}
             alt={product.name}
@@ -54,7 +68,8 @@ export default function ProductCard({ product, currentPage }) {
           </div>
         </Link>
         <div className="p-5 flex flex-col grow">
-          <Link to={`/product/${product.id}`}>
+          {/* changed: Fixed product.id typo to product._id and preserved page query */}
+          <Link to={`/product/${product._id}?page=${currentPage}`}>
             <h3 className="hover:text-orange-400 font-extrabold transition-all duration-500 line-clamp-1 cursor-pointer">
               {product.name}
             </h3>
@@ -80,7 +95,6 @@ export default function ProductCard({ product, currentPage }) {
               <button
                 onClick={() => {
                   setShow(true);
-
                 }}
                 className="w-14 h-14 flex items-center justify-center rounded-full border border-red-500 text-red-500 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200"
               >
@@ -91,13 +105,22 @@ export default function ProductCard({ product, currentPage }) {
             <button
               onClick={() => handleAdd(product)}
               disabled={stockQuantity <= 0}
-              className={`mt-5 flex items-center justify-center w-full py-3 font-bold rounded-full border  transition-all duration-200 ${stockQuantity > 0 ? "bg-orange-500  border-orange-500 text-white cursor-pointer hover:bg-orange-600":"bg-red-500/10 text-red-400 cursor-not-allowed border-red-500/20"}`}
+              className={`mt-5 flex items-center justify-center w-full py-3 font-bold rounded-full border transition-all duration-200 ${
+                stockQuantity > 0
+                  ? "bg-orange-500 border-orange-500 text-white cursor-pointer hover:bg-orange-600"
+                  : "bg-red-500/10 text-red-400 cursor-not-allowed border-red-500/20"
+              }`}
             >
               <ShoppingCart size={20} />
               <span className="ml-2">{stockQuantity > 0 ? "Add to Cart" : "✕ Out of Stock"}</span>
             </button>
           )}
-          <ConfirmModal isOpen={show} onCancel={()=>setShow(false)} isConfirming={isDeleting} onConfirm={()=>handleDel(product._id)}/>
+          <ConfirmModal
+            isOpen={show}
+            onCancel={() => setShow(false)}
+            isConfirming={isDeleting}
+            onConfirm={() => handleDel(product._id)}
+          />
         </div>
       </div>
     </>

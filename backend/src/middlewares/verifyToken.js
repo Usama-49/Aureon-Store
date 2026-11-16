@@ -18,7 +18,24 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// middleware/requireVerified.js
+const optionalVerifyToken = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    req.user = null; // Guest user
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Logged-in user
+    next();
+  } catch (err) {
+    req.user = null;
+    next();
+  }
+};
+
 const requireVerified = (req, res, next) => {
   if (!req.user?.isVerified) {
     return res.status(403).json({
@@ -28,4 +45,4 @@ const requireVerified = (req, res, next) => {
   next();
 };
 
-module.exports = { verifyToken, requireVerified };
+module.exports = { verifyToken, optionalVerifyToken, requireVerified };

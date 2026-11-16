@@ -21,6 +21,7 @@ export default function AddListing() {
     return str
       .trim()
       .split(" ")
+      .filter(Boolean)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
   };
@@ -55,7 +56,7 @@ export default function AddListing() {
     } finally {
       setLoading(false);
       setConfirming(false);
-      setShow(false)
+      setShow(false);
     }
   };
   return (

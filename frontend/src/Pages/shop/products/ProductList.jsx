@@ -7,7 +7,7 @@ import Pagination from "../../../Components/Pagination";
 import Loading from "../../../Components/Loading";
 import { useSearchParams } from "react-router-dom";
 
-export default function ProductList() {
+export default function ProductList({ loggedIn, role }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
 
@@ -54,7 +54,13 @@ export default function ProductList() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {products.map((prod) => (
-            <ProductCard key={prod._id} product={prod} currentPage={currentPage} />
+            <ProductCard
+              key={prod._id}
+              product={prod}
+              currentPage={currentPage}
+              loggedIn={loggedIn}
+              role={role}
+            />
           ))}
         </div>
       )}

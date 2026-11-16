@@ -1,15 +1,27 @@
 const mongoose = require("mongoose");
 
+const formatCategory = (val) => {
+  if (!val || typeof val !== "string") return "Uncategorized";
+  return val
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
 const itemsSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       unique: true,
-      required: true,
+      required: [true, "Product name is required"],
+      trim: true,
     },
     price: {
       type: Number,
-      required: true,
+      required: [true, "Product price is required"],
+      min: [0.01, "Price must be greater than 0"],
     },
     image: {
       url: {
@@ -23,19 +35,28 @@ const itemsSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
+      required: [true, "Product description is required"],
+      trim: true,
     },
     category: {
       type: String,
       required: true,
+      default: "Uncategorized",
+      trim: true,
+      set: formatCategory,
     },
     stock: {
       type: Number,
-      required: true,
+      required: [true, "Stock quantity is required"],
+      min: [0, "Stock cannot be negative"],
+      default: 0,
     },
   },
   { timestamps: true },
 );
+
+itemsSchema.index({ category: 1 });
+itemsSchema.index({ name: "text", description: "text" });
 
 const itemsModel = mongoose.model("Item", itemsSchema);
 

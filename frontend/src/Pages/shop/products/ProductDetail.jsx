@@ -1,19 +1,49 @@
-import { useContext, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ChevronLeft, Tag, Zap, SquarePen, ShoppingCart, TriangleAlert } from "lucide-react";
 import { CartContext } from "../../../Context/CartContext";
 import { authContext } from "../../../Context/AuthContext";
 import { toast } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
+import api from "../../../services/api/api";
+import Loading from "../../../Components/Loading";
 
 export default function ProductDetail() {
   const [searchParams] = useSearchParams();
   const page = searchParams.get("page") || 1;
   const { addToCart, products } = useContext(CartContext);
-  const { role } = useContext(authContext);
+  const { role, loggedIn } = useContext(authContext);
   const { id } = useParams();
-  const product = products?.find((data) => data._id == id);
   const navigate = useNavigate();
+
+  // Check if product is already in context state first
+  const cachedProduct = products?.find((data) => data._id === id);
+  const [product, setProduct] = useState(cachedProduct || null);
+  const [loading, setLoading] = useState(!cachedProduct);
+
+  useEffect(() => {
+    if (cachedProduct) {
+      setProduct(cachedProduct);
+      setLoading(false);
+      return;
+    }
+
+    // Fallback fetch on page refresh or direct URL visit
+    const fetchProductById = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/items/${id}`);
+        setProduct(res.data.item);
+      } catch (err) {
+        console.error("Failed to fetch product details:", err);
+        toast.error(err.response?.data?.message || "Failed to load product details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductById();
+  }, [id, cachedProduct]);
+
   const handleEdit = async (id) => {
     try {
       navigate(`/admin/edit/${id}`);
@@ -21,12 +51,38 @@ export default function ProductDetail() {
       console.log(err);
     }
   };
+
   const handleAdd = async (product) => {
+    if (!loggedIn) {
+      toast.warn("Plz login first");
+      navigate("/login");
+      return;
+    }
+
     addToCart(product);
     toast.success("Added to Cart");
   };
 
-  useEffect(() => {}, [products, id]);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="container px-4 sm:px-8 bg-gray-800 min-h-screen rounded-2xl my-8 p-6 md:p-12 border border-gray-800 flex flex-col items-center justify-center text-zinc-400">
+        <p className="text-xl font-semibold mb-4">Product not found!</p>
+        <Link to={`/home?page=${page}`}>
+          <button className="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-all cursor-pointer">
+            Back to Store
+          </button>
+        </Link>
+      </div>
+    );
+  }
 
   const stockQuantity = product?.stock;
 
@@ -46,7 +102,8 @@ export default function ProductDetail() {
             classes: "bg-green-500/10 text-green-400 border border-green-500/20",
           };
 
-  const isDisabled = stockQuantity === 0 && role === "user";
+  const isDisabled = stockQuantity === 0 && role !== "admin";
+
   return (
     <>
       <div className="container px-4 sm:px-8 bg-gray-800 min-h-screen rounded-2xl my-8 p-6 md:p-12 border border-gray-800">
@@ -76,7 +133,7 @@ export default function ProductDetail() {
             </div>
 
             <p className="font-bold text-orange-400 mb-4 text-xl hover:text-yellow-300/80 transition-colors ease-in-out duration-300">
-              ${product?.price}
+              Pkr:{product?.price}
             </p>
 
             <div className="mb-4">
@@ -137,7 +194,7 @@ export default function ProductDetail() {
               </span>
             </button>
 
-            {role === "user" && (
+            {role !== "admin" && (
               <Link to={"/home"}>
                 <button className="mt-5 flex items-center justify-center flex-row max-auto w-full py-3 bg-orange-400/10 border border-orange-500 text-white font-bold rounded-full hover:bg-orange-600/20 transition-all duration-200 cursor-pointer">
                   <span className="ml-2">Keep Shopping</span>
