@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { useContext, useState } from "react";
 import { CartContext } from "../../Context/CartContext";
-import Loading from "../../Components/Loading";
 import api from "../../services/api/api";
 import ConfirmModal from "../../Components/ConfirmModal";
 
@@ -16,6 +15,7 @@ export default function AddListing() {
   const [show, setShow] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [formData, setFormData] = useState(null);
+
   const formatCategory = (str) => {
     if (!str) return "";
     return str
@@ -36,6 +36,7 @@ export default function AddListing() {
     setFormData(data);
     setShow(true);
   };
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -52,13 +53,14 @@ export default function AddListing() {
       console.log("Status:", error.response?.status);
       console.log("Data:", error.response?.data);
       console.log("Message:", error.message);
-      toast.error("Something went wrong ❌");
+      toast.error(error.response?.data?.message || "Something went wrong ❌");
     } finally {
       setLoading(false);
       setConfirming(false);
       setShow(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-zinc-900 px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -94,8 +96,9 @@ export default function AddListing() {
                 required
               />
             </div>
+
             <div>
-              <label className="block text-zinc-300 mb-2 font-medium">Product Price ($)</label>
+              <label className="block text-zinc-300 mb-2 font-medium">Product Price (PKR)</label>
 
               <input
                 type="number"
@@ -108,6 +111,28 @@ export default function AddListing() {
                 required
               />
             </div>
+
+            {/* // changed: Updated input name and defaultValue to use oldPrice */}
+            {id && (
+              <div>
+                <label className="block text-zinc-300 mb-2 font-medium">
+                  Old Price (PKR){" "}
+                  <span className="text-zinc-400 text-sm font-normal">
+                    (Optional - leave empty to remove sale)
+                  </span>
+                </label>
+
+                <input
+                  type="number"
+                  name="oldPrice"
+                  defaultValue={item?.oldPrice ?? ""}
+                  placeholder="e.g. 1999 (must be higher than current price)"
+                  min="1"
+                  step="0.01"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-orange-500 transition-all"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-zinc-300 mb-2 font-medium">Product Category</label>
@@ -134,6 +159,7 @@ export default function AddListing() {
                 required
               />
             </div>
+
             <div>
               <label className="block text-zinc-300 mb-2 font-medium">Product Image</label>
 

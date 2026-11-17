@@ -135,12 +135,32 @@ const patchItem = async (req, res) => {
         message: "Product not found.",
       });
     }
-    const { name, description, price, category, stock } = req.body;
+
+    const { name, description, price, oldPrice, category, stock } = req.body;
+
     if (name !== undefined) product.name = name;
     if (description !== undefined) product.description = description;
-    if (price !== undefined) product.price = price;
     if (category !== undefined) product.category = category;
     if (stock !== undefined) product.stock = stock;
+
+    if (price !== undefined) {
+      const currentPrice = Number(price);
+      product.price = currentPrice;
+
+      const hasOldPrice =
+        oldPrice !== undefined && oldPrice !== "" && oldPrice !== "null" && oldPrice !== null;
+
+      if (hasOldPrice && Number(oldPrice) > currentPrice) {
+        const parsedOldPrice = Number(oldPrice);
+        product.oldPrice = parsedOldPrice;
+        product.discountPercentage = Math.round(
+          ((parsedOldPrice - currentPrice) / parsedOldPrice) * 100,
+        );
+      } else {
+        product.oldPrice = null;
+        product.discountPercentage = null;
+      }
+    }
 
     if (req.file) {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -168,7 +188,6 @@ const patchItem = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    // Handle Mongoose validation errors gracefully with 400 instead of 500
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((val) => val.message);
       return res.status(400).json({

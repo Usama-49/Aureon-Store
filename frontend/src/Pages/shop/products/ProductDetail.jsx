@@ -126,15 +126,31 @@ export default function ProductDetail() {
           </div>
 
           <div className="flex flex-col justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2 hover:text-yellow-300/80 transition-colors ease-in-out duration-300">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <h1 className="text-3xl font-bold text-white hover:text-yellow-300/80 transition-colors ease-in-out duration-300">
                 {product?.name}
               </h1>
+
+              {/* // changed: Dynamically render live discount percentage badge if active */}
+              {product?.discountPercentage > 0 && (
+                <span className="bg-red-600 text-white px-3.5 py-1 text-xs font-bold rounded-full shadow-lg animate-bounce uppercase tracking-wider shrink-0">
+                  {product.discountPercentage}% OFF
+                </span>
+              )}
             </div>
 
-            <p className="font-bold text-orange-400 mb-4 text-xl hover:text-yellow-300/80 transition-colors ease-in-out duration-300">
-              Pkr:{product?.price}
-            </p>
+            {/* // changed: Live price and conditional old price strikethrough */}
+            <div className="mb-4">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-orange-400 text-sm font-semibold tracking-wide">PKR</span>
+                <span className="text-white text-2xl font-bold">{product?.price}</span>
+              </div>
+              {product?.oldPrice && (
+                <span className="text-zinc-500 text-sm line-through block mt-0.5">
+                  PKR {product.oldPrice}
+                </span>
+              )}
+            </div>
 
             <div className="mb-4">
               <span
@@ -143,6 +159,7 @@ export default function ProductDetail() {
                 {stockStatus.text}
               </span>
             </div>
+
             <h2 className="text-lg font-bold mb-2 border-b border-orange-900/50 pb-2 flex items-center text-gray-200">
               <Tag className="w-5 h-5 text-orange-400" />
               <span className="ml-2 hover:text-yellow-300/80 transition-colors ease-in-out duration-300">
@@ -168,6 +185,7 @@ export default function ProductDetail() {
                 <span>Immediate Shipping for In-Stock Items</span>
               </li>
             </ul>
+
             <div className="mt-5 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4 flex gap-3">
               <TriangleAlert size={18} className="text-yellow-400 shrink-0 mt-0.5" />
 
@@ -176,6 +194,7 @@ export default function ProductDetail() {
                 availability changes, you'll be asked to update your cart before placing your order.
               </p>
             </div>
+
             <button
               onClick={() => {
                 role === "admin" ? handleEdit(id) : product && handleAdd(product);

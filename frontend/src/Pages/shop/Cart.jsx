@@ -58,12 +58,14 @@ export default function Cart() {
               <span className="text-orange-400">$</span>
               <span>Order Total</span>
             </h3>
-
             {/* Pricing Breakdowns */}
             <div className="space-y-3.5 border-b border-gray-800 pb-5 text-sm sm:text-base">
               <div className="flex justify-between items-center text-gray-400 font-medium">
                 <span>SubTotal</span>
-                <span className="text-gray-200 font-semibold">${totalPrice}</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+                  <span className="text-gray-200 font-semibold">{totalPrice}</span>
+                </div>
               </div>
               <div className="flex justify-between items-center text-gray-400 font-medium">
                 <span>Shipping (Express)</span>
@@ -74,7 +76,12 @@ export default function Cart() {
             {/* Estimated Total */}
             <div className="pt-5 flex justify-between items-center text-lg sm:text-xl font-bold text-white">
               <span>Estimated Total</span>
-              <span className="text-orange-400">${totalPrice}</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-orange-400 text-xs sm:text-sm font-semibold tracking-wide">
+                  PKR
+                </span>
+                <span className="text-white">{totalPrice}</span>
+              </div>
             </div>
 
             {/* Proceed to Checkout Button */}

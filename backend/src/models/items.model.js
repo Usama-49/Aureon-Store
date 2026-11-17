@@ -23,6 +23,22 @@ const itemsSchema = new mongoose.Schema(
       required: [true, "Product price is required"],
       min: [0.01, "Price must be greater than 0"],
     },
+    oldPrice: {
+      type: Number,
+      default: null,
+      validate: {
+        validator: function (val) {
+          return val === null || val > 0;
+        },
+        message: "Old price must be greater than 0",
+      },
+    },
+    discountPercentage: {
+      type: Number,
+      default: null,
+      min: [1, "Discount percentage must be at least 1%"],
+      max: [99, "Discount percentage cannot exceed 99%"],
+    },
     image: {
       url: {
         type: String,

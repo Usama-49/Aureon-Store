@@ -110,7 +110,7 @@ export default function Login() {
             <span className="font-bold text-zinc-300">Note:</span>{" "}
             <span className="text-zinc-400">If login is not working, please try </span>
             <Link
-              to="/"
+              to="/landing"
               className="inline-block font-semibold text-red-400 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-md hover:bg-zinc-700 hover:border-zinc-600 transition-colors duration-150"
             >
               Continue with Google

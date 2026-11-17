@@ -2,21 +2,18 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
 export default function OrderCard({ order }) {
-const formatDateTime = (date) => {
-  return new Date(date).toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
-const moreItems = order.items.length;
-const totalQuantity = order.items.reduce(
-  (sum, item) => sum + item.quantity,
-  0
-);
+  const formatDateTime = (date) => {
+    return new Date(date).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+  const moreItems = order.items.length;
+  const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
   const statusStyles = {
     Pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
@@ -83,7 +80,10 @@ const totalQuantity = order.items.reduce(
           <div className="text-center">
             <p className="text-gray-500 text-sm uppercase">Total</p>
 
-            <h3 className="text-xl font-bold text-orange-500">${order.totalPrice}</h3>
+            <div className="flex items-baseline justify-center gap-1 mt-0.5">
+              <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+              <h3 className="text-xl font-bold text-white">{order.totalPrice}</h3>
+            </div>
           </div>
 
           <span

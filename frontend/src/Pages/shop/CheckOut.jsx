@@ -68,17 +68,13 @@ export default function CheckOut() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                Full Name
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Full Name</label>
               <input
                 type="text"
                 name="name"
                 required
                 value={details.name}
-                onChange={(e) =>
-                  setDetails({ ...details, [e.target.name]: e.target.value })
-                }
+                onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
                 placeholder="John Doe"
                 className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
               />
@@ -94,9 +90,7 @@ export default function CheckOut() {
                 name="address"
                 required
                 value={details.address}
-                onChange={(e) =>
-                  setDetails({ ...details, [e.target.name]: e.target.value })
-                }
+                onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
                 placeholder="123 Main St, Apt 4B"
                 className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
               />
@@ -105,34 +99,26 @@ export default function CheckOut() {
             {/* City & Zip Code Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                  City
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">City</label>
                 <input
                   type="text"
                   name="city"
                   required
                   value={details.city}
-                  onChange={(e) =>
-                    setDetails({ ...details, [e.target.name]: e.target.value })
-                  }
+                  onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
                   placeholder="New York"
                   className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                  Zip Code
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Zip Code</label>
                 <input
                   type="number"
                   name="zipCode"
                   required
                   value={details.zipCode}
-                  onChange={(e) =>
-                    setDetails({ ...details, [e.target.name]: e.target.value })
-                  }
+                  onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
                   placeholder="10001"
                   className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
                 />
@@ -144,7 +130,13 @@ export default function CheckOut() {
               type="submit"
               className="mt-6 w-full py-3.5 bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all duration-200 cursor-pointer"
             >
-              Pay & Confirm Order (${totalPrice})
+              <span className="inline-flex items-baseline gap-1.5">
+                <span>Pay & Confirm Order</span>
+                <span className="inline-flex items-baseline gap-1">
+                  <span className="text-orange-200 text-xs font-semibold tracking-wide">PKR</span>
+                  <span>{totalPrice}</span>
+                </span>
+              </span>
             </button>
           </form>
         </div>
@@ -164,12 +156,12 @@ export default function CheckOut() {
                 className="flex justify-between items-center text-sm sm:text-base gap-3"
               >
                 <span className="text-gray-300 font-medium truncate flex-1">
-                  {item.name}{" "}
-                  <span className="text-gray-500 text-xs">x{item.quantity}</span>
+                  {item.name} <span className="text-gray-500 text-xs">x{item.quantity}</span>
                 </span>
-                <span className="font-semibold text-orange-400 flex-shrink-0">
-                  ${item.price * item.quantity}
-                </span>
+                <div className="flex items-baseline gap-1 flex-shrink-0">
+                  <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+                  <span className="font-semibold text-white">{item.price * item.quantity}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -178,7 +170,10 @@ export default function CheckOut() {
           <div className="space-y-3 pt-4 border-b border-gray-800 pb-4 text-sm sm:text-base">
             <div className="flex justify-between text-gray-400 font-medium">
               <span>SubTotal</span>
-              <span className="text-gray-200">${totalPrice}</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+                <span className="text-gray-200 font-semibold">{totalPrice}</span>
+              </div>
             </div>
             <div className="flex justify-between text-gray-400 font-medium">
               <span>Shipping (Express)</span>
@@ -188,11 +183,16 @@ export default function CheckOut() {
 
           <div className="pt-4 flex justify-between items-center text-lg sm:text-xl font-bold text-white">
             <span>Total Due</span>
-            <span className="text-orange-400">${totalPrice}</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-orange-400 text-xs sm:text-sm font-semibold tracking-wide">
+                PKR
+              </span>
+              <span className="text-white">{totalPrice}</span>
+            </div>
           </div>
 
           <div className="mt-5 flex items-center justify-center gap-2 text-gray-400/80 text-xs text-center font-medium">
-            <ShieldCheck className="w-4 h-4 text-green-400 flex-shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
             <span>All Transactions are Processed Securely</span>
           </div>
         </div>

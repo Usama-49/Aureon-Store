@@ -76,7 +76,7 @@ export default function NavBar() {
 
           {!isBanned && role === "user" && (
             <Link
-              to={"/admin/orders"}
+              to={"/orders"}
               className="bg-orange-500/10 p-2 sm:p-3 rounded-xl hover:bg-orange-400/20 transition-all ease-in-out duration-300 border border-orange-400 shadow-lg cursor-pointer"
               title="My Orders"
             >

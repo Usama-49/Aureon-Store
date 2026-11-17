@@ -22,7 +22,17 @@ export default function CartItem({ item }) {
           <h3 className="text-base sm:text-lg font-semibold text-white truncate group-hover:text-orange-400 transition-colors">
             {item.name}
           </h3>
-          <p className="text-sm sm:text-base text-gray-400 font-medium mt-0.5">${item.price}</p>
+
+          <div className="flex items-baseline gap-2 mt-0.5">
+            <div className="flex items-baseline gap-1">
+              <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+              <span className="text-sm sm:text-base text-white font-bold">{item.price}</span>
+            </div>
+
+            {item?.oldPrice && (
+              <span className="text-zinc-500 text-xs line-through">PKR {item.oldPrice}</span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -52,9 +62,12 @@ export default function CartItem({ item }) {
 
         {/* Calculated Item Total */}
         <div className="text-right min-w-20">
-          <p className="text-base sm:text-lg text-orange-400 font-bold tracking-tight">
-            ${item.price * item.quantity}
-          </p>
+          <div className="flex items-baseline justify-end gap-1">
+            <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+            <span className="text-base sm:text-lg text-white font-bold tracking-tight">
+              {item.price * item.quantity}
+            </span>
+          </div>
         </div>
 
         <button

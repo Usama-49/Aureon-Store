@@ -12,7 +12,6 @@ export default function ProductCard({ product, currentPage }) {
   const stockQuantity = product?.stock;
 
   const navigate = useNavigate();
-  // changed: Pull loggedIn alongside role from authContext
   const { role, loggedIn } = useContext(authContext);
   const [isDeleting, setIsDeleting] = useState(false);
   const [show, setShow] = useState(false);
@@ -40,7 +39,6 @@ export default function ProductCard({ product, currentPage }) {
   };
 
   const handleAdd = async (product) => {
-    // changed: Redirect guests to /login with a warning toast instead of adding to cart
     if (!loggedIn) {
       toast.warn("Plz login first");
       navigate("/login");
@@ -56,37 +54,66 @@ export default function ProductCard({ product, currentPage }) {
       <div className="bg-gray-900 overflow-hidden rounded-2xl flex flex-col height-full transition-all duration-400 ease-in-out border border-gray-800 hover:scale-[1.03]">
         <Link
           to={`/product/${product._id}?page=${currentPage}`}
-          className="relative cursor-pointer overflow-hidden"
+          className="relative cursor-pointer overflow-hidden block"
         >
           <img
             src={product.image.url}
             alt={product.name}
-            className="w-full h-56 object-cover transition-all duration-500 hover:scale-110 hover:opacity-80 "
+            className="w-full h-56 object-cover transition-all duration-500 hover:scale-110 hover:opacity-80"
           />
-          <div className="absolute bottom-0 left-0 bg-orange-600/90 text-white px-2 py-1 text-xl font-medium rounded-tr-xl ">
-            {product.price}$
-          </div>
+
+          {/* // changed: Only show Sale! badge if discountPercentage is active (> 0) */}
+          {product?.discountPercentage > 0 && (
+            <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 text-xs font-bold rounded-full shadow-lg animate-bounce uppercase tracking-wider">
+              Sale!
+            </div>
+          )}
+
+          {/* // changed: Dynamically render live discount percentage instead of hardcoded 90% OFF */}
+          {product?.discountPercentage > 0 && (
+            <div className="absolute bottom-0 left-0 bg-orange-600/90 text-white px-3 py-1 text-sm font-semibold rounded-tr-xl">
+              {product.discountPercentage}% OFF
+            </div>
+          )}
         </Link>
+
         <div className="p-5 flex flex-col grow">
-          {/* changed: Fixed product.id typo to product._id and preserved page query */}
-          <Link to={`/product/${product._id}?page=${currentPage}`}>
-            <h3 className="hover:text-orange-400 font-extrabold transition-all duration-500 line-clamp-1 cursor-pointer">
-              {product.name}
-            </h3>
-          </Link>
-          <p className="line-clamp-3 text-gray-400 text-sm">{product.description}</p>
-          <div className="mt-2">
-            <span className="px-2 py-1 bg-gray-800 border border-gray-700 rounded-full">
+          <div className="flex justify-between items-start gap-2 mb-2">
+            <Link to={`/product/${product._id}?page=${currentPage}`} className="flex-1 min-w-0">
+              <h3 className="hover:text-orange-400 font-extrabold transition-all duration-500 truncate cursor-pointer text-white">
+                {product.name}
+              </h3>
+            </Link>
+
+            {/* // changed: Live price and conditional old price rendering */}
+            <div className="text-right shrink-0">
+              <div className="flex items-baseline justify-end gap-1">
+                <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+                <span className="text-white text-lg font-bold">{product.price}</span>
+              </div>
+              {product?.oldPrice && (
+                <span className="text-zinc-500 text-xs line-through block">
+                  PKR {product.oldPrice}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <p className="line-clamp-3 text-gray-400 text-sm mb-2">{product.description}</p>
+
+          <div className="mt-auto">
+            <span className="px-2 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs text-gray-300">
               {product.category}
             </span>
           </div>
+
           {role === "admin" ? (
             <div className="mt-5 flex items-center gap-2">
               <button
                 onClick={() => {
                   handleEdit(product._id);
                 }}
-                className="flex-1 flex items-center justify-center py-3 bg-orange-500 border border-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-200"
+                className="flex-1 flex items-center justify-center py-3 bg-orange-500 border border-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-200 cursor-pointer"
               >
                 <SquarePen size={20} />
                 <span className="ml-2">Edit Product</span>
@@ -96,7 +123,7 @@ export default function ProductCard({ product, currentPage }) {
                 onClick={() => {
                   setShow(true);
                 }}
-                className="w-14 h-14 flex items-center justify-center rounded-full border border-red-500 text-red-500 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200"
+                className="w-14 h-14 flex items-center justify-center rounded-full border border-red-500 text-red-500 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200 cursor-pointer"
               >
                 <Trash2 size={20} />
               </button>
@@ -115,6 +142,7 @@ export default function ProductCard({ product, currentPage }) {
               <span className="ml-2">{stockQuantity > 0 ? "Add to Cart" : "✕ Out of Stock"}</span>
             </button>
           )}
+
           <ConfirmModal
             isOpen={show}
             onCancel={() => setShow(false)}

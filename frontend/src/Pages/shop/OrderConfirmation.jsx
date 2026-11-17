@@ -1,7 +1,7 @@
-import {CircleCheckBig} from "lucide-react";
-import {Link} from "react-router-dom";
+import { CircleCheckBig } from "lucide-react";
+import { Link } from "react-router-dom";
 
-export default function OrderConfirmation({deliveryDetails}) {
+export default function OrderConfirmation({ deliveryDetails }) {
   return (
     <>
       <div className="flex min-h-screen items-center justify-center">
@@ -13,12 +13,18 @@ export default function OrderConfirmation({deliveryDetails}) {
             <p className="mt-3 text-2xl font-bold">Order Confirmed!</p>
           </div>
           <div className="flex items-center justify-center w-[80%] mx-auto ">
-            <p className="text-gray-400 mt-3 text-center text-sm ">Your Transaction is Complete. A confirmation email has been sent to Your Acoount.</p>
+            <p className="text-gray-400 mt-3 text-center text-sm ">
+              Your Transaction is Complete. A confirmation email has been sent to Your Acoount.
+            </p>
           </div>
           <div className="flex flex-col items-center justify-center">
             <div className="flex flex-col mt-5 w-80 h-30 bg-green-400/15 rounded-xl border-1 border-green-400">
-              <h2 className="font-semibold text-green-200 p-1 mt-1 ml-2">{deliveryDetails?.name}</h2>
-              <p className="text-sm text-green-200/60 ml-3 mb-2 line-clamp-1">{deliveryDetails?.adress}</p>
+              <h2 className="font-semibold text-green-200 p-1 mt-1 ml-2">
+                {deliveryDetails?.name}
+              </h2>
+              <p className="text-sm text-green-200/60 ml-3 mb-2 line-clamp-1">
+                {deliveryDetails?.adress}
+              </p>
               <p className="text-sm text-green-200/60 ml-3 mb-2">
                 {deliveryDetails?.city}, {deliveryDetails?.zip}
               </p>
