@@ -10,7 +10,7 @@ const getItems = async (req, res) => {
     }
 
     const page = Number(req.query.page) || 1;
-    const PAGE_SIZE = 12;
+    const PAGE_SIZE = Number(req.query.limit) || 12;
     const { search, category } = req.query;
     let filter = {};
 

@@ -58,7 +58,10 @@ export default function AdminOrderCard({ order }) {
         {/* Right */}
         <div className="flex items-center justify-between md:justify-end gap-6">
           <div className="text-right">
-            <p className="text-2xl font-bold text-white">${order.totalPrice}</p>
+            <div className="flex items-baseline justify-end gap-1.5">
+              <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+              <p className="text-2xl font-bold text-white">{order.totalPrice}</p>
+            </div>
 
             <p className="text-sm text-zinc-500 mt-1">
               {new Date(order.createdAt).toLocaleDateString()}

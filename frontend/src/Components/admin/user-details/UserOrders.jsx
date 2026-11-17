@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, ChevronRight, CircleDollarSign, Package } from "lucide-react";
+import { CalendarDays, ChevronRight, Package } from "lucide-react";
 
 export default function UserOrders({ orders }) {
   if (orders.length === 0) {
@@ -65,10 +65,9 @@ export default function UserOrders({ orders }) {
               <div className="text-right">
                 <p className="text-sm text-zinc-400">Total</p>
 
-                <div className="mt-2 flex items-center justify-end gap-1 font-semibold text-white">
-                  <CircleDollarSign size={18} className="text-orange-500" />
-
-                  {order.totalPrice}
+                <div className="mt-2 flex items-baseline justify-end gap-1.5 font-semibold text-white">
+                  <span className="text-orange-400 text-xs tracking-wide">PKR</span>
+                  <span className="text-lg font-bold text-white">{order.totalPrice}</span>
                 </div>
               </div>
 

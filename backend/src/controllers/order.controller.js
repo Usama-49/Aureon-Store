@@ -94,23 +94,31 @@ const addOrder = async (req, res) => {
 const getOrderStats = async (req, res) => {
   try {
     const userId = req.user.id;
+
     const totalOrders = await orderModel.countDocuments({ user: userId });
+
     const pending = await orderModel.countDocuments({
       user: userId,
       orderStatus: "Pending",
     });
+
     const delivered = await orderModel.countDocuments({
       user: userId,
       orderStatus: "Delivered",
     });
+
     const cancelled = await orderModel.countDocuments({
       user: userId,
       orderStatus: "Cancelled",
     });
+
+    // Aggregate total spent, explicitly excluding "Cancelled" orders from the calculation
     const spentResult = await orderModel.aggregate([
       {
         $match: {
           user: new mongoose.Types.ObjectId(userId),
+          // Exclude cancelled orders so they don't count towards total spent
+          orderStatus: { $ne: "Cancelled" },
         },
       },
       {
@@ -122,6 +130,8 @@ const getOrderStats = async (req, res) => {
         },
       },
     ]);
+
+    // Extract totalSpent from aggregation result, default to 0 if none found
     const totalSpent = spentResult.length > 0 ? spentResult[0].totalSpent : 0;
 
     return res.status(200).json({

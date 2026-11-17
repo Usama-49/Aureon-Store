@@ -11,7 +11,7 @@ A full-stack MERN e-commerce platform built with a modern monorepo architecture.
 - **Product Discovery:** Browse products with pagination, category filtering, and live search.
 - **Dynamic Pricing & Discounts:** Real-time calculation of active prices, crossed-out original prices (`oldPrice`), and automated discount percentage badges.
 - **Smart Shopping Cart & Checkout:** Persistent cart state, quantity controls, live stock checks during checkout, and detailed order tracking.
-- **Account Security:** Secure registration and login with JWT cookies, email verification flows, and password reset functionality.
+- **Account Security:** Secure registration and login with JWT cookies, email verification flows, and password reset functionality plus Oauth 2.0.
 
 ### 🛡️ Admin Dashboard
 
@@ -23,8 +23,8 @@ A full-stack MERN e-commerce platform built with a modern monorepo architecture.
 
 ## 🧰 Tech Stack
 
-- **Frontend:** React, Vite, Tailwind CSS, React Router, Context API, Axios, Lucide Icons, React Toastify
-- **Backend:** Node.js, Express.js, MongoDB, Mongoose, Express Validator, Multer / Cloudinary
+- **Frontend:** React, Vite, Tailwind CSS, React Router, Context API, Axios, Lucide-React icons, React Toastify
+- **Backend:** Node.js, Express.js, MongoDB, Mongoose, Express Validator, Multer
 - **Authentication & Security:** JSON Web Tokens (JWT), bcrypt, Role-Based Access Control (RBAC)
 
 ---

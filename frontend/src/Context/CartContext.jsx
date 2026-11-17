@@ -37,11 +37,11 @@ export function CartProvider({ children }) {
     }
   };
   useEffect(() => {
+    fetchCategories();
     if (loggedIn) {
       const params = new URLSearchParams(window.location.search);
       const initialPage = Number(params.get("page")) || 1;
       fetchProducts(initialPage);
-      fetchCategories();
     }
   }, [loggedIn]);
 

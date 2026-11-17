@@ -3,15 +3,12 @@ import AdminHeader from "../../Components/admin/orders/AdminHeader";
 import AdminFilters from "../../Components/admin/orders/AdminFilters";
 import AdminStats from "../../Components/admin/orders/AdminStats";
 import AdminOrderCard from "../../Components/admin/orders/AdminOrderCard";
-// import { dummyOrders } from "./DummyData";
-import { Link } from "react-router-dom";
 import api from "../../services/api/api";
 
 export default function AdminOrders() {
-  // Temporary Dummy Data (Will Replace Tomorrow)
   const [orders, setOrders] = useState([]);
 
- useEffect(() => {
+  useEffect(() => {
     const fetch = async () => {
       try {
         const res = await api.get("/admin/orders");
@@ -24,7 +21,6 @@ export default function AdminOrders() {
   }, []);
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
-  // const orders = dummyOrders;
 
   function handleSearch(e) {
     setSearch(e.target.value);
@@ -70,9 +66,7 @@ export default function AdminOrders() {
         {/* Orders */}
         <div className="mt-8 space-y-5">
           {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-                <AdminOrderCard key={order._id} order={order} />
-            ))
+            filteredOrders.map((order) => <AdminOrderCard key={order._id} order={order} />)
           ) : (
             <div className="bg-zinc-900 border border-zinc-700 rounded-2xl py-14 text-center">
               <p className="text-zinc-400 text-lg">No orders found.</p>

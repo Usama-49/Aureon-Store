@@ -38,7 +38,8 @@ export default function AdminStats({ orders }) {
     },
     {
       title: "Revenue",
-      value: `$${totalRevenue}`,
+      value: totalRevenue,
+      isCurrency: true,
       icon: CircleDollarSign,
       iconColor: "text-blue-400",
       bgColor: "bg-blue-500/10",
@@ -61,7 +62,14 @@ export default function AdminStats({ orders }) {
               <div>
                 <p className="text-zinc-400 text-sm">{stat.title}</p>
 
-                <h2 className="text-3xl font-bold text-white mt-2">{stat.value}</h2>
+                {stat.isCurrency ? (
+                  <div className="flex items-baseline gap-1.5 mt-2">
+                    <span className="text-blue-400 text-md font-semibold tracking-wide">PKR</span>
+                    <h2 className="text-3xl font-bold text-white">{stat.value}</h2>
+                  </div>
+                ) : (
+                  <h2 className="text-3xl font-bold text-white mt-2">{stat.value}</h2>
+                )}
               </div>
 
               <div className={`p-3 rounded-xl ${stat.bgColor}`}>

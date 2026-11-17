@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarDays } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import StatusCards from "./order-details/StatusCards";
 import Adress from "./order-details/Adress";
 import OrderHeader from "./order-details/OrderHeader";
@@ -9,57 +9,82 @@ import PaymentMethod from "./order-details/PaymentMethod";
 import OrderDate from "./order-details/OrderDate";
 import { useEffect, useState } from "react";
 import api from "../../../services/api/api";
-import { CartContext } from "../../../Context/CartContext";
 import Loading from "../../../Components/Loading";
 
 export default function OrderDetails() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const res = await api.get(`/order/${id}`);
-      setOrder(res.data);
+    const fetchOrderDetails = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/order/${id}`);
+        setOrder(res.data);
+      } catch (err) {
+        console.error("Failed to fetch order details:", err);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetch();
+    fetchOrderDetails();
   }, [id]);
 
-  if (!order) {
-    return <Loading />
+  if (loading || !order) {
+    return <Loading />;
   }
 
   return (
-    <section className="min-h-screen bg-gray-950 text-white py-10 px-5">
-      <div className="max-w-5xl mx-auto">
-        {/* Back Button */}
+    <main className="min-h-screen bg-gray-950 text-white py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* ================= BACK BUTTON ================= */}
         <Link
           to="/orders"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 transition mb-8"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 transition-colors font-medium text-sm group mb-2"
         >
-          <ArrowLeft size={18} />
-          Back to Orders
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Orders</span>
         </Link>
-        {/* Product Information & image */}
-        <OrderHeader order={order} /> 
-        {/* Status Cards */}
+
+        {/* ================= ORDER HEADER ================= */}
+        <OrderHeader order={order} />
+
+        {/* ================= STATUS CARDS ================= */}
         <StatusCards order={order} />
-        {/* Shipping Address */}
-        <Adress order={order} /> 
-        {/* Payment & Ordered Date */}
-        <div className="grid md:grid-cols-2 gap-6 mt-8">
-          <PaymentMethod order={order} /> 
-          <OrderDate order={order} /> 
+
+        {/* ================= SHIPPING ADDRESS ================= */}
+        <Adress order={order} />
+
+        {/* ================= PAYMENT & ORDER DATE ================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <PaymentMethod order={order} />
+          <OrderDate order={order} />
         </div>
-        {/* Order Summary */}
-        <OrderSummary order={order} /> 
-        {/* Cancel Button */}
-        <CancelBtn id={id} order={order} setOrder={setOrder}/>
-        {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-10">
-          Need help with this order?{" "}
-          <span className="text-orange-400 cursor-pointer hover:underline">Contact Support</span>
-        </p>
+
+        {/* ================= ORDER SUMMARY ================= */}
+        <OrderSummary order={order} />
+
+        {/* ================= CANCEL BUTTON ================= */}
+        <CancelBtn id={id} order={order} setOrder={setOrder} />
+
+        {/* ================= FOOTER / SUPPORT ================= */}
+        <div className="pt-6 border-t border-gray-900 text-center">
+          <p className="text-gray-500 text-sm">
+            Need help with this order?{" "}
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=woodorycraft@gmail.com&su=${encodeURIComponent(
+                `Support Inquiry - Order #${order._id}`,
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 font-medium cursor-pointer hover:text-orange-500 hover:underline transition-colors"
+            >
+              Contact Support
+            </a>
+          </p>
+        </div>
       </div>
-    </section>
+    </main>
   );
 }

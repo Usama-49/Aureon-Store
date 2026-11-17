@@ -39,12 +39,22 @@ export default function OrderHeader({ order }) {
 
                     <div className="bg-gray-800 rounded-xl border border-transparent p-4 transition-all duration-300 hover:border-orange-500 hover:-translate-y-1">
                       <p className="text-sm text-gray-400 mb-1">Unit Price</p>
-                      <p className="text-xl font-semibold text-white">${item.price}</p>
+                      <div className="flex items-baseline gap-1.5 mt-0.5">
+                        <span className="text-orange-400 text-xs font-semibold tracking-wide">
+                          PKR
+                        </span>
+                        <p className="text-xl font-bold text-white">{item.price}</p>
+                      </div>
                     </div>
 
                     <div className="bg-gray-800 rounded-xl border border-transparent p-4 transition-all duration-300 hover:border-orange-500 hover:-translate-y-1">
                       <p className="text-sm text-gray-400 mb-1">Subtotal</p>
-                      <p className="text-2xl font-bold text-orange-400">${subtotal}</p>
+                      <div className="flex items-baseline gap-1.5 mt-0.5">
+                        <span className="text-orange-400 text-xs font-semibold tracking-wide">
+                          PKR
+                        </span>
+                        <p className="text-2xl font-bold text-white">{subtotal}</p>
+                      </div>
                     </div>
                   </div>
                 </div>

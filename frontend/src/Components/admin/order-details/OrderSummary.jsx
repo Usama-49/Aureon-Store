@@ -2,7 +2,7 @@ export default function OrderSummary({ totalPrice, createdAt, updatedAt }) {
   return (
     <div
       className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300
-     hover:border-orange-500/70 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25)]"
+      hover:border-orange-500/70 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25)]"
     >
       <h2 className="mb-6 text-lg font-semibold text-white">Order Summary</h2>
 
@@ -10,7 +10,10 @@ export default function OrderSummary({ totalPrice, createdAt, updatedAt }) {
         <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <span className="text-zinc-400">Total Amount</span>
 
-          <span className="text-xl font-bold text-orange-500">${totalPrice}</span>
+          <div className="flex items-baseline gap-1.5 font-semibold text-orange-500">
+            <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+            <span className="text-xl font-bold">{totalPrice}</span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between">

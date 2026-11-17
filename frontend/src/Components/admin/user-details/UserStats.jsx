@@ -13,7 +13,9 @@ export default function UserStats({ totalOrders, totalSpent, pendingOrders, deli
     },
     {
       title: "Spent",
-      value: `$${totalSpent}`,
+      // Pass the raw value or handle it conditionally inside the loop
+      value: totalSpent,
+      isCurrency: true,
       icon: CircleDollarSign,
       iconColor: "text-blue-400",
       bgColor: "bg-blue-500/10",
@@ -54,7 +56,14 @@ export default function UserStats({ totalOrders, totalSpent, pendingOrders, deli
               <div>
                 <p className="text-sm text-zinc-400">{stat.title}</p>
 
-                <h2 className="mt-2 text-3xl font-bold text-white">{stat.value}</h2>
+                {stat.isCurrency ? (
+                  <div className="flex items-baseline gap-1.5 mt-2">
+                    <span className="text-orange-400 text-md font-semibold tracking-wide">PKR</span>
+                    <h2 className="text-3xl font-bold text-white">{stat.value}</h2>
+                  </div>
+                ) : (
+                  <h2 className="mt-2 text-3xl font-bold text-white">{stat.value}</h2>
+                )}
               </div>
 
               <div

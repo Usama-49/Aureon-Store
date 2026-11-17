@@ -13,31 +13,40 @@ export default function OrderSummary({ order }) {
           <div className="space-y-4">
             <div className="flex justify-between text-gray-300">
               <span>Product</span>
-              <span>{item.name}</span>
+              <span className="font-medium text-white">{item.name}</span>
             </div>
 
             <div className="flex justify-between text-gray-300">
               <span>Quantity</span>
-              <span>{item.quantity}</span>
+              <span className="font-medium text-white">{item.quantity}</span>
             </div>
 
-            <div className="flex justify-between text-gray-300">
+            <div className="flex justify-between items-baseline text-gray-300">
               <span>Unit Price</span>
-              <span>${item.price}</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+                <span className="font-medium text-white">{item.price}</span>
+              </div>
             </div>
 
-            <div className="flex justify-between text-gray-300">
+            <div className="flex justify-between items-baseline text-gray-300">
               <span>Subtotal</span>
-              <span>${item.price * item.quantity}</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-orange-400 text-xs font-semibold tracking-wide">PKR</span>
+                <span className="font-medium text-white">{item.price * item.quantity}</span>
+              </div>
             </div>
           </div>
           {index !== order.items.length - 1 && <hr className="my-6 border-gray-700" />}
         </div>
       ))}
 
-      <div className="border-t border-gray-700 pt-5 mt-6 flex justify-between">
-        <span className="text-lg font-semibold">Total Paid</span>
-        <span className="text-2xl font-bold text-orange-400">${order.totalPrice}</span>
+      <div className="border-t border-gray-700 pt-5 mt-6 flex justify-between items-baseline">
+        <span className="text-lg font-semibold text-white">Total Paid</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-orange-400 text-sm font-semibold tracking-wide">PKR</span>
+          <span className="text-2xl font-bold text-white">{order.totalPrice}</span>
+        </div>
       </div>
     </div>
   );

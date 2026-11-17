@@ -1,7 +1,9 @@
+import { createPortal } from "react-dom";
+
 export default function ConfirmModal({ isOpen, onCancel, onConfirm, isConfirming = false }) {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl">
         <p className="text-center text-base font-medium text-white">
@@ -28,6 +30,7 @@ export default function ConfirmModal({ isOpen, onCancel, onConfirm, isConfirming
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

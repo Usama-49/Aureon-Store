@@ -8,26 +8,36 @@ import {
   LogIn,
   UserPlus,
 } from "lucide-react";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../Context/CartContext";
 import { authContext } from "../Context/AuthContext";
 import { toast } from "react-toastify";
 import api from "../services/api/api";
+import ConfirmModal from "./ConfirmModal";
 
 export default function NavBar() {
   const { cartCount } = useContext(CartContext);
   const { loggedIn, setLoggedIn, role, setRole, isBanned } = useContext(authContext);
   const navigate = useNavigate();
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogOut = async () => {
     try {
+      setIsLoggingOut(true);
       await api.post("/auth/logout", {});
       setLoggedIn(false);
       setRole(null);
+      toast.success("Logged out successfully");
       navigate("/", { replace: true });
     } catch (err) {
       console.log(err);
+      toast.error(err.response?.data?.message || "Failed to log out");
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutModal(false);
     }
   };
 
@@ -103,7 +113,8 @@ export default function NavBar() {
 
           {loggedIn ? (
             <button
-              onClick={handleLogOut}
+              type="button"
+              onClick={() => setShowLogoutModal(true)}
               className="bg-orange-500/10 p-2 sm:px-4 sm:py-3 rounded-xl hover:bg-orange-400/20 transition-all ease-in-out duration-300 border border-orange-400 shadow-lg cursor-pointer flex items-center gap-2 text-orange-400 font-medium text-sm"
               title="Logout"
             >
@@ -130,6 +141,13 @@ export default function NavBar() {
           )}
         </nav>
       </div>
+
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onCancel={() => setShowLogoutModal(false)}
+        onConfirm={handleLogOut}
+        isConfirming={isLoggingOut}
+      />
     </header>
   );
 }
