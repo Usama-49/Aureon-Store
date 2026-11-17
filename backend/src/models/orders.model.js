@@ -8,6 +8,10 @@ const orderSchema = new mongoose.Schema(
       ref: "user",
       required: true,
     },
+    whatsappNo: {
+      type: String,
+      required: true,
+    },
 
     // Products in this order
     items: [
@@ -95,7 +99,7 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const orderModel = mongoose.model("Order", orderSchema);

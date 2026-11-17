@@ -10,7 +10,6 @@ import ShippingInfo from "../../Components/admin/order-details/ShippingInfo";
 import { useEffect, useState } from "react";
 import api from "../../services/api/api";
 import Loading from "../../Components/Loading";
-// import { dummyOrders } from "./DummyData";
 export default function AdminOrderDetails() {
   const [order, setOrders] = useState(null);
   const { id } = useParams();
@@ -26,12 +25,9 @@ export default function AdminOrderDetails() {
     };
     fetch();
   }, [id]);
-  // const order = orders?.find((order) => order._id === id);
 
   if (!order) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   return (
@@ -55,7 +51,7 @@ export default function AdminOrderDetails() {
       {/* Main Grid */}
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
-          <CustomerInfo userEmail={order?.user.email} />
+          <CustomerInfo userEmail={order?.user.email} whatsappNo={order?.whatsappNo} />
 
           <ShippingInfo
             shippingAddress={order?.shippingAddress}

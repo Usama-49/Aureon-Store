@@ -5,14 +5,24 @@ const mongoose = require("mongoose");
 const addOrder = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { items, shippingAddress } = req.body;
+    const { items, shippingAddress, whatsappNo } = req.body;
+
     //* Items Validation ...
     if (!items || items.length === 0) {
       return res.status(400).json({
         message: "Your cart is empty.",
       });
     }
-    //* Shipping Adress Validation ...
+
+    //* WhatsApp Number Validation ...
+    const pakPhoneRegex = /^((\+92)|(0092)|(92)|0)?3[0-9]{9}$/;
+    if (!whatsappNo || !pakPhoneRegex.test(whatsappNo.trim())) {
+      return res.status(400).json({
+        message: "Please enter a valid Pakistani WhatsApp number (e.g., 03001234567).",
+      });
+    }
+
+    //* Shipping Address Validation ...
     if (
       !shippingAddress ||
       !shippingAddress.name ||
@@ -21,9 +31,10 @@ const addOrder = async (req, res) => {
       !shippingAddress.zipCode
     ) {
       return res.status(400).json({
-        message: "You didn't enter a shipping adress.",
+        message: "You didn't enter a shipping address.",
       });
     }
+
     //* Item validation 1 by 1 etc
     let totalPrice = 0;
     const orderItems = [];
@@ -64,13 +75,16 @@ const addOrder = async (req, res) => {
 
       totalPrice += product.price * item.quantity;
     }
+
     //* Create order on DB
     const order = await orderModel.create({
       user: userId,
+      whatsappNo: whatsappNo.trim(),
       items: orderItems,
       shippingAddress,
       totalPrice,
     });
+
     //* Reduce quantity in Stock
     for (const item of items) {
       const product = await itemsModel.findById(item.product);
@@ -79,6 +93,7 @@ const addOrder = async (req, res) => {
 
       await product.save();
     }
+
     //* Return ...
     return res.status(201).json({
       message: "Order placed successfully.",
@@ -90,7 +105,6 @@ const addOrder = async (req, res) => {
     });
   }
 };
-
 const getOrderStats = async (req, res) => {
   try {
     const userId = req.user.id;

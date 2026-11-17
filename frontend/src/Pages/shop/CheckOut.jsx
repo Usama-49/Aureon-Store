@@ -1,4 +1,4 @@
-import { MapPin, Package, ChevronLeft, ShieldCheck } from "lucide-react";
+import { MapPin, Package, ChevronLeft, ShieldCheck, Phone } from "lucide-react";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../Context/CartContext";
@@ -9,6 +9,7 @@ import api from "../../services/api/api";
 export default function CheckOut() {
   const { totalPrice, clearCart, cart } = useContext(CartContext);
   const [confirm, setConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const [details, setDetails] = useState({
@@ -16,27 +17,42 @@ export default function CheckOut() {
     address: "",
     city: "",
     zipCode: "",
+    whatsappNo: "",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
     const payload = {
       items: cart.map((item) => ({
         product: item._id,
         quantity: item.quantity,
       })),
-      shippingAddress: details,
+      shippingAddress: {
+        name: details.name.trim(),
+        address: details.address.trim(),
+        city: details.city.trim(),
+        zipCode: details.zipCode.toString().trim(),
+      },
+      whatsappNo: details.whatsappNo.trim(),
     };
 
     try {
+      setSubmitting(true);
       await api.post("/order/add", payload);
       toast.success("Order Placed!");
       clearCart();
       setConfirm(true);
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to place order.");
+      const errorMsg =
+        err.response?.data?.errors?.[0]?.msg ||
+        err.response?.data?.message ||
+        "Failed to place order.";
+      toast.error(errorMsg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -80,6 +96,24 @@ export default function CheckOut() {
               />
             </div>
 
+            {/* WhatsApp Number */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5 flex items-center gap-1.5">
+                <Phone className="w-4 h-4 text-orange-400" />
+                <span>WhatsApp Number</span>
+                <span className="text-red-500 text-xs font-normal">(required)</span>
+              </label>
+              <input
+                type="tel"
+                name="whatsappNo"
+                required
+                value={details.whatsappNo}
+                onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
+                placeholder="03001234567"
+                className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
+              />
+            </div>
+
             {/* Address */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1.5">
@@ -106,7 +140,7 @@ export default function CheckOut() {
                   required
                   value={details.city}
                   onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
-                  placeholder="New York"
+                  placeholder="Lahore"
                   className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
                 />
               </div>
@@ -119,7 +153,7 @@ export default function CheckOut() {
                   required
                   value={details.zipCode}
                   onChange={(e) => setDetails({ ...details, [e.target.name]: e.target.value })}
-                  placeholder="10001"
+                  placeholder="54000"
                   className="w-full rounded-xl px-4 py-3 bg-gray-800/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all duration-200"
                 />
               </div>
@@ -128,15 +162,20 @@ export default function CheckOut() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="mt-6 w-full py-3.5 bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all duration-200 cursor-pointer"
+              disabled={submitting}
+              className="mt-6 w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all duration-200 cursor-pointer"
             >
-              <span className="inline-flex items-baseline gap-1.5">
-                <span>Pay & Confirm Order</span>
-                <span className="inline-flex items-baseline gap-1">
-                  <span className="text-orange-200 text-xs font-semibold tracking-wide">PKR</span>
-                  <span>{totalPrice}</span>
+              {submitting ? (
+                <span>Placing Order...</span>
+              ) : (
+                <span className="inline-flex items-baseline gap-1.5">
+                  <span>Confirm Order: </span>
+                  <span className="inline-flex items-baseline gap-1">
+                    <span className="text-orange-200 text-sm font-semibold tracking-wide">PKR</span>
+                    <span>{totalPrice}</span>
+                  </span>
                 </span>
-              </span>
+              )}
             </button>
           </form>
         </div>

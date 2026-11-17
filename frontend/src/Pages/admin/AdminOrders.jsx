@@ -4,23 +4,28 @@ import AdminFilters from "../../Components/admin/orders/AdminFilters";
 import AdminStats from "../../Components/admin/orders/AdminStats";
 import AdminOrderCard from "../../Components/admin/orders/AdminOrderCard";
 import api from "../../services/api/api";
+import Loading from "../../Components/Loading";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("All");
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchOrders = async () => {
       try {
+        setLoading(true);
         const res = await api.get("/admin/orders");
         setOrders(res.data.orders);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetch();
+    fetchOrders();
   }, []);
-  const [search, setSearch] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("All");
 
   function handleSearch(e) {
     setSearch(e.target.value);
@@ -30,7 +35,7 @@ export default function AdminOrders() {
     const matchesStatus = selectedStatus === "All" || order.orderStatus === selectedStatus;
 
     const matchesSearch =
-      order.user.email.toLowerCase().includes(search.toLowerCase()) ||
+      order.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
       order._id.toLowerCase().includes(search.toLowerCase());
 
     return matchesStatus && matchesSearch;
@@ -63,9 +68,13 @@ export default function AdminOrders() {
           <AdminStats orders={orders} />
         </div>
 
-        {/* Orders */}
+        {/* Orders Section with targeted loading */}
         <div className="mt-8 space-y-5">
-          {filteredOrders.length > 0 ? (
+          {loading ? (
+            <div className="py-20 flex justify-center items-center">
+              <Loading />
+            </div>
+          ) : filteredOrders.length > 0 ? (
             filteredOrders.map((order) => <AdminOrderCard key={order._id} order={order} />)
           ) : (
             <div className="bg-zinc-900 border border-zinc-700 rounded-2xl py-14 text-center">
