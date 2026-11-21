@@ -21,14 +21,22 @@ const upload = multer({
 });
 const adminRouter = express.Router();
 
+const productUploadFields = upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "galleryImage1", maxCount: 1 },
+  { name: "galleryImage2", maxCount: 1 },
+  { name: "galleryImage3", maxCount: 1 },
+  { name: "galleryImage4", maxCount: 1 },
+]);
+
 // Apply middleware to ALL admin routes below
 adminRouter.use(verifyToken, requireVerified);
 
 adminRouter.get("/totalProducts", totalProducts);
 adminRouter.get("/totalUsers", totalUsers);
-adminRouter.post("/addItem", upload.single("image"), itemValidator, addItem);
+adminRouter.post("/addItem", productUploadFields, itemValidator, addItem);
+adminRouter.patch("/items/:id", productUploadFields, itemValidator, patchItem);
 adminRouter.delete("/items/:id", delItem);
-adminRouter.patch("/items/:id", upload.single("image"), itemValidator, patchItem);
 adminRouter.get("/orders", getOrders);
 adminRouter.get("/orders/:id", getOrder);
 adminRouter.patch("/orders/:id", updateOrder);

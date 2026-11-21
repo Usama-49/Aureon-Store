@@ -22,26 +22,26 @@ const itemValidator = [
     .trim()
     .notEmpty()
     .withMessage("Category must be added")
-    .isLength({ min: 3, max: 10 })
+    .isLength({ min: 3, max: 50 })
     .withMessage("Category should be 3 to 10 characters"),
   body("stock")
     .notEmpty()
     .withMessage("Stock Quantity must be added")
     .bail()
-    .isInt({ min: 0 })
-    .withMessage("Stock must be non-negative Number"),
+    .isInt({ min: 0, max: 9999 })
+    .withMessage("Stock must be an integer between 0 and 9999"),
   body("description")
     .trim()
     .notEmpty()
     .withMessage("Must add Description")
     .bail()
-    .isLength({ min: 30, max: 500 })
-    .withMessage("Description should be 30 to 500 characters"),
+    .isLength({ min: 30, max: 2000 })
+    .withMessage("Description should be 30 to 2000 characters"),
   body("price")
     .notEmpty()
     .withMessage("Price must be added")
-    .isFloat({ gt: 0 })
-    .withMessage("Price must be a number greater than 0"),
+    .isFloat({ gt: 0, max: 9999999 })
+    .withMessage("Price must be greater than 0 and at most 9999999"),
 
   body("oldPrice")
     .optional({ values: "falsy" })
@@ -53,6 +53,9 @@ const itemValidator = [
 
       if (Number.isNaN(parsedOld) || parsedOld <= 0) {
         throw new Error("Old price must be a positive number");
+      }
+      if (parsedOld > 9999999) {
+        throw new Error("Old price cannot exceed 9999999");
       }
       if (!Number.isNaN(parsedBase) && parsedOld <= parsedBase) {
         throw new Error("Old price must be higher than the current product price");

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail, Bug, Store, X, ExternalLink } from "lucide-react";
+import { STORE_ADMIN_EMAIL, DEVELOPER_EMAIL, adminMailto, devMailto } from "../config/contact";
 
 export default function Footer() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function Footer() {
             <div className="space-y-4">
               {/* Option 1: Developer */}
               <a
-                href="mailto:usamahere49@gmail.com"
+                href={devMailto("Bug Report")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsModalOpen(false)}
@@ -79,13 +80,13 @@ export default function Footer() {
                 </div>
                 <div className="mt-3 pt-3 border-t border-gray-700/50 flex items-center justify-between text-xs">
                   <span className="text-gray-500 font-medium">Email:</span>
-                  <span className="text-orange-400 font-mono">usamahere49@gmail.com</span>
+                  <span className="text-orange-400 font-mono">{DEVELOPER_EMAIL}</span>
                 </div>
               </a>
 
               {/* Option 2: Store Admin */}
               <a
-                href="mailto:woodorycraft@gmail.com"
+                href={adminMailto("Support Request")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsModalOpen(false)}
@@ -112,7 +113,7 @@ export default function Footer() {
                 </div>
                 <div className="mt-3 pt-3 border-t border-gray-700/50 flex items-center justify-between text-xs">
                   <span className="text-gray-500 font-medium">Email:</span>
-                  <span className="text-orange-400 font-mono">woodorycraft@gmail.com</span>
+                  <span className="text-orange-400 font-mono">{STORE_ADMIN_EMAIL}</span>
                 </div>
               </a>
             </div>

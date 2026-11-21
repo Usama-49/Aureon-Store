@@ -1,7 +1,7 @@
 {
-  "name": "ecom-app-by-Usama",
+  "name": "AureonStore",
   "private": true,
-  "version": "3.7.0",
+  "version": "4.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

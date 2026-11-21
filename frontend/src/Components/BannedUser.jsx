@@ -1,8 +1,9 @@
-import { Mail } from "lucide-react";
+import { Mail, ShieldAlert, Bug } from "lucide-react";
+import { STORE_ADMIN_EMAIL, DEVELOPER_EMAIL, adminMailto, devMailto } from "../config/contact";
 
 export default function BannedUser() {
   return (
-    <section className="min-h-screen bg-zinc-900 flex items-center justify-center px-6">
+    <section className="min-h-screen bg-zinc-900 flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-md rounded-2xl border border-red-900/60 bg-zinc-950 p-8 text-center shadow-xl">
         <h1 className="text-2xl font-semibold text-red-500">Account Banned</h1>
 
@@ -22,14 +23,29 @@ export default function BannedUser() {
           <li>A brief explanation of why you believe the ban should be reviewed</li>
         </ul>
 
+        {/* ─── Primary action: appeal to Store Admin ─────────────── */}
         <div className="mt-6 pt-4 border-t border-zinc-900 flex flex-col items-center gap-2">
-          <span className="text-sm text-zinc-400">Contact the administrator at</span>
+          <span className="text-sm text-zinc-400">Appeal to the store administrator at</span>
           <a
-            href="mailto:usamahere49@gmail.com?subject=Account%20Ban%20Review%20Request"
-            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-xl transition-all duration-200 text-sm shadow-md"
+            href={adminMailto("Account Ban Review Request")}
+            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-500 font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-xl transition-all duration-200 text-sm shadow-md"
           >
-            <Mail className="w-4 h-4 text-orange-500" />
-            <span>usamahere49@gmail.com</span>
+            <ShieldAlert className="w-4 h-4 text-orange-500" />
+            <span>{STORE_ADMIN_EMAIL}</span>
+          </a>
+        </div>
+
+        {/* ─── Secondary: report a bug / technical issue to dev ──── */}
+        <div className="mt-4 pt-4 border-t border-zinc-900 flex flex-col items-center gap-1">
+          <span className="text-xs text-zinc-500">
+            Facing a technical issue? Report it to the developer at
+          </span>
+          <a
+            href={devMailto("Bug Report – Banned User Page")}
+            className="inline-flex items-center gap-2 text-zinc-400 hover:text-orange-400 font-medium text-xs transition-all duration-200"
+          >
+            <Bug className="w-3.5 h-3.5" />
+            <span>{DEVELOPER_EMAIL}</span>
           </a>
         </div>
       </div>

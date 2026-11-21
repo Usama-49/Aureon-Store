@@ -23,8 +23,10 @@ const getItems = async (req, res) => {
       filter.name = { $regex: search.trim(), $options: "i" };
     }
 
+    // Exclude gallery array from list endpoint so only main product data/image is returned
     const items = await itemsModel
       .find(filter)
+      .select("-gallery")
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE);
 
@@ -59,6 +61,7 @@ const getItemById = async (req, res) => {
       });
     }
 
+    // Keep full item document (including gallery) for single-product detail view
     const item = await itemsModel.findById(id);
 
     if (!item) {

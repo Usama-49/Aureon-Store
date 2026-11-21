@@ -6,6 +6,7 @@ import { authContext } from "../../../Context/AuthContext";
 import { toast } from "react-toastify";
 import api from "../../../services/api/api";
 import Loading from "../../../Components/Loading";
+import ProductGallery from "./ProductGallery";
 
 export default function ProductDetail() {
   const [searchParams] = useSearchParams();
@@ -15,33 +16,39 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Check if product is already in context state first
   const cachedProduct = products?.find((data) => data._id === id);
   const [product, setProduct] = useState(cachedProduct || null);
   const [loading, setLoading] = useState(!cachedProduct);
 
+  // changed: Always fetch fresh /items/:id detail so gallery images are present even if cached from list
   useEffect(() => {
-    if (cachedProduct) {
-      setProduct(cachedProduct);
-      setLoading(false);
-      return;
-    }
+    let isMounted = true;
 
-    // Fallback fetch on page refresh or direct URL visit
     const fetchProductById = async () => {
       try {
-        setLoading(true);
+        if (!cachedProduct) setLoading(true);
         const res = await api.get(`/items/${id}`);
-        setProduct(res.data.item);
+        if (isMounted) {
+          setProduct(res.data.item);
+        }
       } catch (err) {
         console.error("Failed to fetch product details:", err);
-        toast.error(err.response?.data?.message || "Failed to load product details");
+        if (isMounted && !cachedProduct) {
+          toast.error(err.response?.data?.message || "Failed to load product details");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProductById();
+
+    // Cleanup flag to prevent stale async responses on id change/unmount
+    return () => {
+      isMounted = false;
+    };
   }, [id, cachedProduct]);
 
   const handleEdit = async (id) => {
@@ -103,6 +110,12 @@ export default function ProductDetail() {
           };
 
   const isDisabled = stockQuantity === 0 && role !== "admin";
+  // changed: Extract URL strings from backend gallery objects (or plain URL strings) and remove hardcoded fallback
+  const galleryImages = Array.isArray(product?.gallery)
+    ? product.gallery
+        .map((entry) => (typeof entry === "string" ? entry : entry?.url))
+        .filter(Boolean)
+    : [];
 
   return (
     <>
@@ -131,7 +144,6 @@ export default function ProductDetail() {
                 {product?.name}
               </h1>
 
-              {/* // changed: Dynamically render live discount percentage badge if active */}
               {product?.discountPercentage > 0 && (
                 <span className="bg-red-600 text-white px-3.5 py-1 text-xs font-bold rounded-full shadow-lg animate-bounce uppercase tracking-wider shrink-0">
                   {product.discountPercentage}% OFF
@@ -139,7 +151,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* // changed: Live price and conditional old price strikethrough */}
             <div className="mb-4">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-orange-400 text-sm font-semibold tracking-wide">PKR</span>
@@ -222,6 +233,8 @@ export default function ProductDetail() {
             )}
           </div>
         </div>
+
+        <ProductGallery images={galleryImages} productName={product?.name} />
       </div>
     </>
   );

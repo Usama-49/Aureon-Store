@@ -1,6 +1,6 @@
 import { Navigate, BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProductList from "./Pages/shop/products/ProductList";
-import NavBar from "./Components/Navbar";
+import Header from "./Components/Header"; // <-- renamed
 import Cart from "./Pages/shop/Cart";
 import CheckOut from "./Pages/shop/CheckOut";
 import ProductDetail from "./Pages/shop/products/ProductDetail";
@@ -27,40 +27,83 @@ import ForgotPassword from "./Components/auth/ForgotPassword";
 import ResetPassword from "./Components/auth/ResetPassword";
 
 // Protected Route wrapper for logged-in regular users
+// (ban + verification are already handled globally in App below)
 const ProtectedRoute = ({ children }) => {
-  const { loggedIn, isBanned, isVerified } = useContext(authContext);
-
+  const { loggedIn } = useContext(authContext);
   if (!loggedIn) return <Navigate to="/login" replace />;
-  if (isBanned) return <BannedUser />;
-  if (!isVerified) return <NotVerified />;
-
   return children;
 };
 
 // Admin Route wrapper for admin-only pages
 const AdminRoute = ({ children }) => {
-  const { loggedIn, role, isBanned, isVerified } = useContext(authContext);
-
+  const { loggedIn, role } = useContext(authContext);
   if (!loggedIn) return <Navigate to="/login" replace />;
-  if (isBanned) return <BannedUser />;
-  if (!isVerified) return <NotVerified />;
   if (role !== "admin") return <Navigate to="/home" replace />;
-
   return children;
 };
 
-export default function App() {
-  const { loggedIn, role, authLoading, isBanned } = useContext(authContext);
+// Shared toast config so all branches match
+const toastProps = {
+  position: "top-right",
+  autoClose: 3000,
+  closeOnClick: true,
+  pauseOnHover: true,
+};
 
+export default function App() {
+  const { loggedIn, role, authLoading, isBanned, isVerified } = useContext(authContext);
+
+  // ─── Auth still loading ────────────────────────────────────────────
   if (authLoading) {
     return <Loading />;
   }
 
-  return (
-    <>
+  // ─── Banned user shell ─────────────────────────────────────────────
+  if (loggedIn && isBanned) {
+    return (
       <Router>
-        <div className="min-h-screen w-full overflow-x-hidden bg-zinc-800 font-sans">
-          <NavBar />
+        <div className="min-h-screen w-full overflow-x-hidden bg-zinc-800 font-sans flex flex-col">
+          <Header restricted />
+          <main className="grow">
+            <Routes>
+              <Route path="*" element={<BannedUser />} />
+            </Routes>
+          </main>
+          <Footer />
+          <ToastContainer {...toastProps} />
+        </div>
+      </Router>
+    );
+  }
+
+  // ─── Unverified user shell ─────────────────────────────────────────
+  if (loggedIn && !isVerified) {
+    return (
+      <Router>
+        <div className="min-h-screen w-full overflow-x-hidden bg-zinc-800 font-sans flex flex-col">
+          <Header restricted />
+          <main className="grow">
+            <Routes>
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="*" element={<NotVerified />} />
+            </Routes>
+          </main>
+          <Footer />
+          <ToastContainer {...toastProps} />
+        </div>
+      </Router>
+    );
+  }
+
+  // ─── Normal app (guest OR verified user) ───────────────────────────
+  return (
+    <Router>
+      <div className="min-h-screen w-full overflow-x-hidden bg-zinc-800 font-sans flex flex-col">
+        <Header />
+        <main className="grow">
           <Routes>
             {/* Root Route: Guests go to store, admins go to dashboard */}
             <Route
@@ -177,12 +220,14 @@ export default function App() {
                 </AdminRoute>
               }
             />
-          </Routes>
 
-          {!isBanned && <Footer />}
-          <ToastContainer position="top-right" autoClose={3000} closeOnClick pauseOnHover />
-        </div>
-      </Router>
-    </>
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/home" replace />} />
+          </Routes>
+        </main>
+        <Footer />
+        <ToastContainer {...toastProps} />
+      </div>
+    </Router>
   );
 }

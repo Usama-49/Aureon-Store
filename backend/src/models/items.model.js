@@ -10,6 +10,21 @@ const formatCategory = (val) => {
     .join(" ");
 };
 
+// Define sub-schema for individual gallery image objects without extra _id fields
+const galleryImageSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      required: true,
+    },
+    fileId: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false },
+);
+
 const itemsSchema = new mongoose.Schema(
   {
     name: {
@@ -47,6 +62,16 @@ const itemsSchema = new mongoose.Schema(
       fileId: {
         type: String,
         required: true,
+      },
+    },
+    gallery: {
+      type: [galleryImageSchema],
+      default: [],
+      validate: {
+        validator: function (arr) {
+          return !arr || arr.length <= 4;
+        },
+        message: "A maximum of 4 gallery images is allowed",
       },
     },
     description: {

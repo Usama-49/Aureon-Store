@@ -1,6 +1,12 @@
 const itemsModel = require("../models/items.model");
 const userModel = require("../models/user.model");
 const orderModel = require("../models/orders.model");
+const {
+  validateAndUploadSingleImage,
+  processGalleryUploads,
+  GALLERY_FIELD_NAMES,
+  ALLOWED_IMAGE_TYPES,
+} = require("../utils/galleryUpload");
 const { uploadImage, client } = require("../services/imagekit");
 
 const totalProducts = async (req, res) => {
@@ -51,31 +57,33 @@ const addItem = async (req, res) => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
 
+    const mainImageFile = req.files?.image?.[0];
+
     //* Validate image upload
-    if (!req.file) {
+    if (!mainImageFile) {
       return res.status(400).json({
         message: "Image file is required!",
       });
     }
 
-    const image = req.file.buffer;
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-    if (!allowedTypes.includes(req.file.mimetype)) {
+    // Validate and upload main image via shared service helper
+    const mainUpload = await validateAndUploadSingleImage(mainImageFile);
+    if (mainUpload.error) {
       return res.status(400).json({
-        message: "Only JPG, PNG and WEBP images are allowed.",
+        message: mainUpload.error,
       });
     }
 
-    const result = await uploadImage(image.toString("base64"));
+    const galleryResult = await processGalleryUploads(req.files, []);
+    if (galleryResult.error) {
+      return res.status(400).json({ message: galleryResult.error });
+    }
 
     const item = await itemsModel.create({
       name: name.trim(),
       price: Number(price),
-      image: {
-        url: result.url,
-        fileId: result.fileId,
-      },
+      image: mainUpload.image,
+      gallery: galleryResult.gallery,
       stock: Number(stock),
       description: description.trim(),
       category: formattedCategory || "Uncategorized",
@@ -107,8 +115,17 @@ const delItem = async (req, res) => {
         message: "Item not found",
       });
     }
-    const fileId = toBeDeletedItem.image.fileId;
-    await client.files.delete(fileId);
+    // Collect main image fileId and any existing gallery fileIds (0 to 4 items)
+    const fileIdsToDelete = [
+      toBeDeletedItem.image?.fileId,
+      ...(Array.isArray(toBeDeletedItem.gallery)
+        ? toBeDeletedItem.gallery.map((entry) => entry?.fileId)
+        : []),
+    ].filter(Boolean);
+
+    // Delete all main and gallery image files from ImageKit in parallel
+    await Promise.all(fileIdsToDelete.map((idToDelete) => client.files.delete(idToDelete)));
+
     await itemsModel.findByIdAndDelete(id);
     return res.status(200).json({
       message: "Deletion Successful ✅",
@@ -162,21 +179,35 @@ const patchItem = async (req, res) => {
       }
     }
 
-    if (req.file) {
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    // Read optional replacement main image from upload.fields output
+    const mainImageFile = req.files?.image?.[0];
 
-      if (!allowedTypes.includes(req.file.mimetype)) {
+    // Validate, upload, and swap main image only when a new file is sent
+    if (mainImageFile) {
+      const mainUpload = await validateAndUploadSingleImage(mainImageFile);
+      if (mainUpload.error) {
         return res.status(400).json({
           success: false,
-          message: "Only JPG, PNG and WEBP images are allowed.",
+          message: mainUpload.error,
         });
       }
-      const image = req.file.buffer;
-      const result = await uploadImage(image.toString("base64"));
       await client.files.delete(product.image.fileId);
-      product.image.url = result.url;
-      product.image.fileId = result.fileId;
+      product.image.url = mainUpload.image.url;
+      product.image.fileId = mainUpload.image.fileId;
     }
+
+    // Validate and merge optional gallery files with existing product.gallery
+    const galleryResult = await processGalleryUploads(req.files, product.gallery);
+    // Return 400 if any gallery image has an invalid format
+    if (galleryResult.error) {
+      return res.status(400).json({
+        success: false,
+        message: galleryResult.error,
+      });
+    }
+
+    // Persist updated gallery array on product
+    product.gallery = galleryResult.gallery;
 
     await product.save();
 
